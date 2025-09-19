@@ -1,0 +1,38 @@
+# =========================================
+# IGNORAR CARPETA DE SUBIDAS
+# =========================================
+uploads/
+
+# =========================================
+# ARCHIVOS DE CONFIGURACIÓN LOCALES
+# (por seguridad, no subir credenciales)
+# =========================================
+config/config.php
+
+# =========================================
+# ARCHIVOS TEMPORALES Y LOGS
+# =========================================
+*.log
+*.tmp
+*.bak
+*.swp
+
+# =========================================
+# ARCHIVOS DE SISTEMA (Windows / Mac)
+# =========================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# =========================================
+# CONFIGURACIÓN DE EDITORES
+# =========================================
+.vscode/
+.idea/
+
+# =========================================
+# CACHES Y DEPENDENCIAS (si en futuro usas Composer o Node)
+# =========================================
+vendor/
+node_modules/
