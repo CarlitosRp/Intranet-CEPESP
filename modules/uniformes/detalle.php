@@ -1,3 +1,13 @@
+<?php require_once __DIR__ . '/../../includes/breadcrumbs.php';
+$BASE = rtrim(BASE_URL, '/');
+$URL_CATALOGO = $BASE . '/modules/uniformes/catalogo.php';
+render_breadcrumb([
+    ['label' => 'Catálogo', 'href' => $URL_CATALOGO],
+    ['label' => 'Detalle']
+]);
+?>
+
+
 <?php
 require_once __DIR__ . '/../../includes/db.php';
 header('Content-Type: text/html; charset=UTF-8');
@@ -76,6 +86,8 @@ $hayErrorVars = isset($vars['_error']);
 </head>
 
 <body>
+    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
+
     <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -94,6 +106,9 @@ $hayErrorVars = isset($vars['_error']);
         <!-- Cabecera del producto -->
         <div class="card shadow-sm mb-3">
             <div class="card-body">
+                <?php if (!empty($_GET['ok'])): ?>
+                    <div class="alert alert-success">Cambios guardados correctamente.</div>
+                <?php endif; ?>
                 <h2 class="h6 mb-3">Producto</h2>
                 <dl class="row mb-0">
                     <dt class="col-sm-3">Código</dt>

@@ -83,6 +83,13 @@ function url_with($params = [])
 </head>
 
 <body>
+    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/breadcrumbs.php';
+    render_breadcrumb([
+        ['label' => 'Listado']
+    ]);
+    ?>
+
     <div class="container py-4">
 
         <div class="card shadow-sm mb-3">
