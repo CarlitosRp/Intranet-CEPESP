@@ -1,13 +1,3 @@
-<?php require_once __DIR__ . '/../../includes/breadcrumbs.php';
-$BASE = rtrim(BASE_URL, '/');
-$URL_CATALOGO = $BASE . '/modules/uniformes/catalogo.php';
-render_breadcrumb([
-    ['label' => 'Catálogo', 'href' => $URL_CATALOGO],
-    ['label' => 'Detalle']
-]);
-?>
-
-
 <?php
 require_once __DIR__ . '/../../includes/db.php';
 header('Content-Type: text/html; charset=UTF-8');
@@ -87,7 +77,14 @@ $hayErrorVars = isset($vars['_error']);
 
 <body>
     <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
-
+    <?php require_once __DIR__ . '/../../includes/breadcrumbs.php';
+    $BASE = rtrim(BASE_URL, '/');
+    $URL_CATALOGO = $BASE . '/modules/uniformes/catalogo.php';
+    render_breadcrumb([
+        ['label' => 'Catálogo', 'href' => $URL_CATALOGO],
+        ['label' => 'Detalle']
+    ]);
+    ?>
     <div class="container py-4">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
