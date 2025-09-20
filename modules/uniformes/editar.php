@@ -77,7 +77,7 @@ $maneja_talla = $isPost ? (isset($_POST['maneja_talla']) ? '1' : '0') : ((string
 // 5) Validación + GUARDADO (UPDATE) solo si hay POST
 $guardadoOK = false;
 
-if ($isPost) {
+if ($isPost && !isset($_POST['accion_talla'])) {
     // CSRF
     $token_ok = isset($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token']);
     if (!$token_ok) {
@@ -124,7 +124,101 @@ if ($isPost) {
     }
 }
 
+// --- Acciones de TALLAS (add / delete) -----------------------------
+$flash_talla_ok = '';
+$flash_talla_err = '';
 
+if ($isPost && isset($_POST['accion_talla'])) {
+    // Validar CSRF para acciones de talla
+    $token_ok_t = isset($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token']);
+    if (!$token_ok_t) {
+        $flash_talla_err = 'Token inválido. Recarga la página e inténtalo de nuevo.';
+    } else {
+        $cn = db();
+
+        // Normalizador sencillo de talla
+        $norm_talla = function (string $t): string {
+            $t = trim($t);
+            $t = strtoupper($t);         // “ch”, “m”, “l” → “CH”, “M”, “L”
+            $t = preg_replace('/\s+/', ' ', $t); // espacios múltiples → uno
+            return $t;
+        };
+
+        if ($_POST['accion_talla'] === 'add') {
+            $talla_in = $norm_talla($_POST['talla'] ?? '');
+            if ($talla_in === '') {
+                $flash_talla_err = 'La talla es obligatoria.';
+            } elseif (!preg_match('/^[A-Z0-9ÁÉÍÓÚÜÑ\-\.\/ ]{1,20}$/u', $talla_in)) {
+                // Reglas básicas: letras, números y separadores simples (ajústalo a tu realidad)
+                $flash_talla_err = 'La talla contiene caracteres no permitidos.';
+            } else {
+                // Intentar insertar (con índice único id_equipo+talla)
+                $stmt = mysqli_prepare($cn, "INSERT INTO item_variantes (id_equipo, talla, activo) VALUES (?, ?, 1)");
+                mysqli_stmt_bind_param($stmt, 'is', $id, $talla_in);
+                $stmt = mysqli_prepare($cn, "INSERT INTO item_variantes (id_equipo, talla, activo) VALUES (?, ?, 1)");
+                mysqli_stmt_bind_param($stmt, 'is', $id, $talla_in);
+
+                try {
+                    $ok = mysqli_stmt_execute($stmt);
+                    mysqli_stmt_close($stmt);
+                    if ($ok) {
+                        $flash_talla_ok = 'Talla agregada correctamente.';
+                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_ok=1');
+                        exit;
+                    }
+                } catch (mysqli_sql_exception $ex) {
+                    $code = (int)$ex->getCode();
+                    if ($code === 1062) {
+                        $flash_talla_err = 'Esa talla ya existe para este producto.';
+                        $talla_in = '';
+                    } else {
+                        $flash_talla_err = 'Error al agregar la talla (código ' . $code . ').';
+                        $talla_in = '';
+                    }
+                    if (isset($stmt)) {
+                        mysqli_stmt_close($stmt);
+                    }
+                }
+            }
+        }
+
+        if ($_POST['accion_talla'] === 'del') {
+            $id_var = (int)($_POST['id_variante'] ?? 0);
+            if ($id_var <= 0) {
+                $flash_talla_err = 'ID de variante inválido.';
+            } else {
+                // Borrado seguro (solo si pertenece al equipo actual)
+                $stmt = mysqli_prepare($cn, "DELETE FROM item_variantes WHERE id_variante = ? AND id_equipo = ? LIMIT 1");
+                mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
+
+                $stmt = mysqli_prepare($cn, "DELETE FROM item_variantes WHERE id_variante = ? AND id_equipo = ? LIMIT 1");
+                mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
+
+                try {
+                    $ok = mysqli_stmt_execute($stmt);
+                    $aff = mysqli_affected_rows($cn);
+                    mysqli_stmt_close($stmt);
+
+                    if ($ok && $aff > 0) {
+                        $flash_talla_ok = 'Talla eliminada.';
+                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_ok=1');
+                        exit;
+                    } else {
+                        $flash_talla_err = 'No se pudo eliminar (¿ya no existe o no pertenece a este producto?).';
+                    }
+                } catch (mysqli_sql_exception $ex) {
+                    $flash_talla_err = 'Error al eliminar la talla (código ' . (int)$ex->getCode() . ').';
+                    if (isset($stmt)) {
+                        mysqli_stmt_close($stmt);
+                    }
+                }
+            }
+        }
+    }
+}
+// -------------------------------------------------------------------
 
 ?>
 <!doctype html>
@@ -256,24 +350,77 @@ if ($isPost) {
             </div>
         </div>
 
-        <!-- Tallas existentes (chips) -->
+        <!-- Tallas: alta y baja -->
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="h6 mb-3">Tallas registradas</h2>
+                <h2 class="h6 mb-3">Tallas</h2>
+
+                <?php if (!empty($_GET['t_ok']) || $flash_talla_ok): ?>
+                    <div class="alert alert-success"><?= htmlspecialchars($flash_talla_ok ?: 'Operación realizada correctamente.') ?></div>
+                <?php endif; ?>
+                <?php if (!empty($flash_talla_err)): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($flash_talla_err) ?></div>
+                <?php endif; ?>
+
+                <!-- Alta de talla -->
+                <form class="row g-2 mb-3" method="post" action="editar.php?id=<?= urlencode($e['id_equipo']) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                    <input type="hidden" name="accion_talla" value="add">
+                    <div class="col-sm-4 col-md-3">
+                        <input type="text" name="talla" class="form-control" placeholder="Ej.: CH, M, 26, ÚNICA" maxlength="20" required>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-primary">Agregar talla</button>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-text">Se normaliza en MAYÚSCULAS. No se permiten caracteres especiales raros.</div>
+                    </div>
+                </form>
+
+                <!-- Listado de tallas existentes -->
+                <?php
+                // Releer tallas por si se insertó/borró (o usa $vars si prefieres)
+                $vars = db_select_all("SELECT id_variante, talla FROM item_variantes WHERE id_equipo = $id ORDER BY talla");
+                $hayErrorVars = isset($vars['_error']);
+                ?>
+
                 <?php if ($hayErrorVars): ?>
                     <div class="alert alert-danger">Error al consultar tallas: <?= htmlspecialchars($vars['_error']) ?></div>
                 <?php elseif (!$vars): ?>
                     <div class="alert alert-info">Este producto no tiene tallas registradas.</div>
                 <?php else: ?>
-                    <?php foreach ($vars as $v): ?>
-                        <span class="badge text-bg-primary me-1 mb-1"><?= htmlspecialchars($v['talla']) ?></span>
-                    <?php endforeach; ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:60px">#</th>
+                                    <th>Talla</th>
+                                    <th style="width:1%">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php $i = 1;
+                                foreach ($vars as $v): ?>
+                                    <tr>
+                                        <td><?= $i++ ?></td>
+                                        <td><span class="badge text-bg-primary"><?= htmlspecialchars($v['talla']) ?></span></td>
+                                        <td>
+                                            <form method="post" action="editar.php?id=<?= urlencode($e['id_equipo']) ?>" onsubmit="return confirm('¿Eliminar la talla <?= htmlspecialchars($v['talla']) ?>?');">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                                <input type="hidden" name="accion_talla" value="del">
+                                                <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
+                                                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 <?php endif; ?>
-                <p class="text-muted small mt-3 mb-0">
-                    *Alta/edición/baja de tallas se habilitará después del módulo de permisos (roles).
-                </p>
             </div>
         </div>
+
 
     </div>
     <script src="/intranet-CEPESP/assets/js/bootstrap.bundle.min.js"></script>
