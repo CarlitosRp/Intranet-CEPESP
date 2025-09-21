@@ -102,6 +102,12 @@ function url_with($params = [])
         <div class="card shadow-sm mb-3">
             <div class="card-body">
                 <h1 class="h5 mb-3">Uniformes · Catálogo</h1>
+                <?php if (!empty($_GET['deleted'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show auto-hide" role="alert">
+                        Producto eliminado correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                <?php endif; ?>
 
                 <?php
                 require_once __DIR__ . '/../../includes/auth.php';

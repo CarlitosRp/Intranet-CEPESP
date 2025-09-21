@@ -95,10 +95,31 @@ $hayErrorVars = isset($vars['_error']);
                     <a class="btn btn-outline-secondary btn-sm" href="catalogo.php">← Volver al catálogo</a>
                     <a class="btn btn-outline-secondary btn-sm" href="index.php">Listado (no agrupado)</a>
                     <a class="btn btn-primary btn-sm" href="editar.php?id=<?= urlencode($e['id_equipo']) ?>">✏️ Editar</a>
+                    <?php
+                    // Solo mostrar si el usuario tiene permiso
+                    $canDelete = auth_has_role('admin') || auth_has_role('inventarios') || auth_has_role('almacen');
+                    if (session_status() !== PHP_SESSION_ACTIVE) {
+                        session_start();
+                    }
+                    if (empty($_SESSION['csrf_token'])) {
+                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                    }
+                    $csrf_token = $_SESSION['csrf_token'];
+                    ?>
+
+                    <?php if ($canDelete): ?>
+                        <form method="post" action="eliminar.php" class="d-inline"
+                            onsubmit="return confirm('¿Eliminar definitivamente este producto? Esta acción no se puede deshacer.');">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                            <input type="hidden" name="id_equipo" value="<?= (int)$e['id_equipo'] ?>">
+                            <button class="btn btn-danger">Eliminar</button>
+                        </form>
+                    <?php endif; ?>
+
                 </div>
             </div>
         </div>
-        
+
         <?php if (!empty($_GET['created'])): ?>
             <div class="alert alert-success alert-dismissible fade show auto-hide" role="alert">
                 Producto creado correctamente.
