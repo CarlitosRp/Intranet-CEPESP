@@ -160,25 +160,25 @@ if ($isPost && isset($_POST['accion_talla'])) {
 
                 try {
                     $ok = mysqli_stmt_execute($stmt);
+                    if (!$ok) {
+                        throw new mysqli_sql_exception(mysqli_error($cn), mysqli_errno($cn));
+                    }
                     mysqli_stmt_close($stmt);
-                    if ($ok) {
-                        $flash_talla_ok = 'Talla agregada correctamente.';
-                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_ok=1');
-                        exit;
-                    }
+
+                    // ÉXITO → redirige con estado
+                    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                    header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=added');
+                    exit;
                 } catch (mysqli_sql_exception $ex) {
-                    $code = (int)$ex->getCode();
-                    if ($code === 1062) {
-                        $flash_talla_err = 'Esa talla ya existe para este producto.';
-                        $talla_in = '';
-                    } else {
-                        $flash_talla_err = 'Error al agregar la talla (código ' . $code . ').';
-                        $talla_in = '';
-                    }
                     if (isset($stmt)) {
                         mysqli_stmt_close($stmt);
                     }
+                    if ((int)$ex->getCode() === 1062) {
+                        $flash_talla_err = 'Esa talla ya existe para este producto.';
+                    } else {
+                        $flash_talla_err = 'Error al agregar talla (código ' . (int)$ex->getCode() . ').';
+                    }
+                    $talla_in = ''; // limpiar input
                 }
             }
         }
@@ -196,23 +196,22 @@ if ($isPost && isset($_POST['accion_talla'])) {
                 mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
 
                 try {
-                    $ok = mysqli_stmt_execute($stmt);
+                    $ok  = mysqli_stmt_execute($stmt);
                     $aff = mysqli_affected_rows($cn);
                     mysqli_stmt_close($stmt);
 
                     if ($ok && $aff > 0) {
-                        $flash_talla_ok = 'Talla eliminada.';
                         $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_ok=1');
+                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=deleted');
                         exit;
                     } else {
                         $flash_talla_err = 'No se pudo eliminar (¿ya no existe o no pertenece a este producto?).';
                     }
                 } catch (mysqli_sql_exception $ex) {
-                    $flash_talla_err = 'Error al eliminar la talla (código ' . (int)$ex->getCode() . ').';
                     if (isset($stmt)) {
                         mysqli_stmt_close($stmt);
                     }
+                    $flash_talla_err = 'Error al eliminar la talla (código ' . (int)$ex->getCode() . ').';
                 }
             }
         }
@@ -241,38 +240,49 @@ if ($isPost && isset($_POST['accion_talla'])) {
                 mysqli_stmt_bind_param($stmt, 'sii', $talla_in, $id_var, $id);
 
                 try {
-                    $ok = mysqli_stmt_execute($stmt);
+                    $ok  = mysqli_stmt_execute($stmt);
                     $aff = mysqli_affected_rows($cn);
                     mysqli_stmt_close($stmt);
 
+                    // Nota: $aff puede ser 0 si no cambió (misma talla); lo consideramos OK.
                     if ($ok && $aff >= 0) {
-                        // Nota: si no cambió porque era igual, aff puede ser 0 y está bien.
-                        $flash_talla_ok = 'Talla actualizada.';
                         $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_ok=1');
+                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=updated');
                         exit;
                     } else {
                         $flash_talla_err = 'No se pudo actualizar (¿no existe o no pertenece a este producto?).';
                     }
                 } catch (mysqli_sql_exception $ex) {
-                    $code = (int)$ex->getCode();
-                    if ($code === 1062) {
-                        // choca con el índice único (id_equipo, talla)
-                        $flash_talla_err = 'Ya existe esa talla para este producto.';
-                        $talla_in = '';
-                    } else {
-                        $flash_talla_err = 'Error al actualizar la talla (código ' . $code . ').';
-                        $talla_in = '';
-                    }
                     if (isset($stmt)) {
                         mysqli_stmt_close($stmt);
                     }
+                    if ((int)$ex->getCode() === 1062) {
+                        $flash_talla_err = 'Ya existe esa talla para este producto.';
+                    } else {
+                        $flash_talla_err = 'Error al actualizar la talla (código ' . (int)$ex->getCode() . ').';
+                    }
+                    $talla_in = '';
                 }
             }
         }
     }
 }
 // -------------------------------------------------------------------
+
+$flash_talla_ok  = $flash_talla_ok  ?? '';
+$flash_talla_err = $flash_talla_err ?? '';
+
+$t_status = $_GET['t_status'] ?? '';
+if ($t_status === 'added') {
+    $flash_talla_ok = 'Talla agregada correctamente.';
+}
+if ($t_status === 'updated') {
+    $flash_talla_ok = 'Talla actualizada.';
+}
+if ($t_status === 'deleted') {
+    $flash_talla_ok = 'Talla eliminada.';
+}
+
 
 ?>
 <!doctype html>
@@ -409,12 +419,21 @@ if ($isPost && isset($_POST['accion_talla'])) {
             <div class="card-body">
                 <h2 class="h6 mb-3">Tallas</h2>
 
-                <?php if (!empty($_GET['t_ok']) || $flash_talla_ok): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars($flash_talla_ok ?: 'Operación realizada correctamente.') ?></div>
+                <?php if (!empty($flash_talla_ok)): ?>
+                    <div class="alert alert-success alert-dismissible fade show auto-hide" role="alert">
+                        <?= htmlspecialchars($flash_talla_ok) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
                 <?php endif; ?>
+
                 <?php if (!empty($flash_talla_err)): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($flash_talla_err) ?></div>
+                    <div class="alert alert-danger alert-dismissible fade show auto-hide" role="alert">
+                        <?= htmlspecialchars($flash_talla_err) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
                 <?php endif; ?>
+
+
 
                 <!-- Alta de talla -->
                 <form class="row g-2 mb-3" method="post" action="editar.php?id=<?= urlencode($e['id_equipo']) ?>">
@@ -494,7 +513,5 @@ if ($isPost && isset($_POST['accion_talla'])) {
 
 
     </div>
-    <script src="/intranet-CEPESP/assets/js/bootstrap.bundle.min.js"></script>
-</body>
 
-</html>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -97,8 +97,14 @@ $hayErrorVars = isset($vars['_error']);
                     <a class="btn btn-primary btn-sm" href="editar.php?id=<?= urlencode($e['id_equipo']) ?>">✏️ Editar</a>
                 </div>
             </div>
-
         </div>
+        
+        <?php if (!empty($_GET['created'])): ?>
+            <div class="alert alert-success alert-dismissible fade show auto-hide" role="alert">
+                Producto creado correctamente.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        <?php endif; ?>
 
         <!-- Cabecera del producto -->
         <div class="card shadow-sm mb-3">
@@ -149,7 +155,5 @@ $hayErrorVars = isset($vars['_error']);
         </div>
 
     </div>
-    <script src="/intranet-CEPESP/assets/js/bootstrap.bundle.min.js"></script>
-</body>
 
-</html>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -4,6 +4,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 $cn        = db();
 $q         = isset($_GET['q']) ? trim($_GET['q']) : '';
+$t = isset($_GET['t']) ? trim($_GET['t']) : '';
 $page      = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage   = 10;
 $offset    = ($page - 1) * $perPage;
@@ -20,6 +21,12 @@ if ($q !== '') {
         v.talla       LIKE '%$needle%'
     )";
 }
+
+if ($t !== '') {
+    $needleT = mysqli_real_escape_string($cn, $t);
+    $where  .= " AND v.talla LIKE '%$needleT%'";
+}
+
 
 // Conteo total
 $sqlCount = "
@@ -96,12 +103,26 @@ function url_with($params = [])
             <div class="card-body">
                 <h1 class="h5 mb-3">Uniformes · Catálogo</h1>
 
+                <?php
+                require_once __DIR__ . '/../../includes/auth.php';
+                $canCreate = auth_has_role('admin') || auth_has_role('inventarios') || auth_has_role('almacen');
+                if ($canCreate): ?>
+                    <div class="mb-3">
+                        <a class="btn btn-success" href="crear.php">+ Nuevo producto</a>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Búsqueda -->
                 <form class="row g-2 mb-3" method="get" action="index.php">
                     <div class="col-sm-8 col-md-6">
                         <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" class="form-control"
                             placeholder="Buscar por código, descripción, modelo, categoría o talla">
                     </div>
+                    <div class="col-sm-4 col-md-3">
+                        <input type="text" name="t" value="<?= htmlspecialchars($t) ?>" class="form-control"
+                            placeholder="Filtrar por talla (ej.: CH, 26)">
+                    </div>
+
                     <div class="col-auto">
                         <button class="btn btn-primary">Buscar</button>
                     </div>
@@ -167,7 +188,5 @@ function url_with($params = [])
         </div>
 
     </div>
-    <script src="/intranet-CEPESP/assets/js/bootstrap.bundle.min.js"></script>
-</body>
 
-</html>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
