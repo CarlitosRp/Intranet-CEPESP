@@ -144,124 +144,132 @@ if ($isPost && isset($_POST['accion_talla'])) {
             return $t;
         };
 
+        // --- Guard para acciones de talla según maneja_talla -----------------
+        $mt_row = db_select_all("SELECT maneja_talla FROM equipo WHERE id_equipo = $id LIMIT 1");
+        $mt_db  = (isset($mt_row[0]['maneja_talla']) ? (int)$mt_row[0]['maneja_talla'] : 1);
+
+        $bloquear_tallas = ($mt_db === 0);
+        // ---------------------------------------------------------------------
+
         if ($_POST['accion_talla'] === 'add') {
-            $talla_in = $norm_talla($_POST['talla'] ?? '');
-            if ($talla_in === '') {
-                $flash_talla_err = 'La talla es obligatoria.';
-            } elseif (!preg_match('/^[A-Z0-9ÁÉÍÓÚÜÑ\-\.\/ ]{1,20}$/u', $talla_in)) {
-                // Reglas básicas: letras, números y separadores simples (ajústalo a tu realidad)
-                $flash_talla_err = 'La talla contiene caracteres no permitidos.';
+            if ($bloquear_tallas) {
+                $flash_talla_err = 'Este producto no maneja tallas. No puedes agregar/editar/eliminar tallas.';
             } else {
-                // Intentar insertar (con índice único id_equipo+talla)
-                $stmt = mysqli_prepare($cn, "INSERT INTO item_variantes (id_equipo, talla, activo) VALUES (?, ?, 1)");
-                mysqli_stmt_bind_param($stmt, 'is', $id, $talla_in);
-                $stmt = mysqli_prepare($cn, "INSERT INTO item_variantes (id_equipo, talla, activo) VALUES (?, ?, 1)");
-                mysqli_stmt_bind_param($stmt, 'is', $id, $talla_in);
+                $talla_in = $norm_talla($_POST['talla'] ?? '');
+                if ($talla_in === '') {
+                    $flash_talla_err = 'La talla es obligatoria.';
+                } elseif (!preg_match('/^[A-Z0-9ÁÉÍÓÚÜÑ\-\.\/ ]{1,20}$/u', $talla_in)) {
+                    $flash_talla_err = 'La talla contiene caracteres no permitidos.';
+                } else {
+                    // INSERT con índice único (id_equipo, talla)
+                    $stmt = mysqli_prepare($cn, "INSERT INTO item_variantes (id_equipo, talla, activo) VALUES (?, ?, 1)");
+                    mysqli_stmt_bind_param($stmt, 'is', $id, $talla_in);
 
-                try {
-                    $ok = mysqli_stmt_execute($stmt);
-                    if (!$ok) {
-                        throw new mysqli_sql_exception(mysqli_error($cn), mysqli_errno($cn));
-                    }
-                    mysqli_stmt_close($stmt);
-
-                    // ÉXITO → redirige con estado
-                    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                    header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=added');
-                    exit;
-                } catch (mysqli_sql_exception $ex) {
-                    if (isset($stmt)) {
+                    try {
+                        $ok = mysqli_stmt_execute($stmt);
+                        if (!$ok) {
+                            throw new mysqli_sql_exception(mysqli_error($cn), mysqli_errno($cn));
+                        }
                         mysqli_stmt_close($stmt);
+
+                        // ÉXITO → redirect con mensaje
+                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=added');
+                        exit;
+                    } catch (mysqli_sql_exception $ex) {
+                        if (isset($stmt)) {
+                            mysqli_stmt_close($stmt);
+                        }
+                        if ((int)$ex->getCode() === 1062) {
+                            $flash_talla_err = 'Esa talla ya existe para este producto.';
+                        } else {
+                            $flash_talla_err = 'Error al agregar talla (código ' . (int)$ex->getCode() . ').';
+                        }
+                        $talla_in = ''; // limpiar input al mostrar error
                     }
-                    if ((int)$ex->getCode() === 1062) {
-                        $flash_talla_err = 'Esa talla ya existe para este producto.';
-                    } else {
-                        $flash_talla_err = 'Error al agregar talla (código ' . (int)$ex->getCode() . ').';
-                    }
-                    $talla_in = ''; // limpiar input
                 }
             }
         }
 
         if ($_POST['accion_talla'] === 'del') {
-            $id_var = (int)($_POST['id_variante'] ?? 0);
-            if ($id_var <= 0) {
-                $flash_talla_err = 'ID de variante inválido.';
+            if ($bloquear_tallas) {
+                $flash_talla_err = 'Este producto no maneja tallas. No puedes agregar/editar/eliminar tallas.';
             } else {
-                // Borrado seguro (solo si pertenece al equipo actual)
-                $stmt = mysqli_prepare($cn, "DELETE FROM item_variantes WHERE id_variante = ? AND id_equipo = ? LIMIT 1");
-                mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
+                $id_var = (int)($_POST['id_variante'] ?? 0);
+                if ($id_var <= 0) {
+                    $flash_talla_err = 'ID de variante inválido.';
+                } else {
+                    $stmt = mysqli_prepare($cn, "DELETE FROM item_variantes WHERE id_variante = ? AND id_equipo = ? LIMIT 1");
+                    mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
 
-                $stmt = mysqli_prepare($cn, "DELETE FROM item_variantes WHERE id_variante = ? AND id_equipo = ? LIMIT 1");
-                mysqli_stmt_bind_param($stmt, 'ii', $id_var, $id);
-
-                try {
-                    $ok  = mysqli_stmt_execute($stmt);
-                    $aff = mysqli_affected_rows($cn);
-                    mysqli_stmt_close($stmt);
-
-                    if ($ok && $aff > 0) {
-                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=deleted');
-                        exit;
-                    } else {
-                        $flash_talla_err = 'No se pudo eliminar (¿ya no existe o no pertenece a este producto?).';
-                    }
-                } catch (mysqli_sql_exception $ex) {
-                    if (isset($stmt)) {
+                    try {
+                        $ok  = mysqli_stmt_execute($stmt);
+                        $aff = mysqli_affected_rows($cn);
                         mysqli_stmt_close($stmt);
+
+                        if ($ok && $aff > 0) {
+                            $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                            header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=deleted');
+                            exit;
+                        } else {
+                            $flash_talla_err = 'No se pudo eliminar (¿ya no existe o no pertenece a este producto?).';
+                        }
+                    } catch (mysqli_sql_exception $ex) {
+                        if (isset($stmt)) {
+                            mysqli_stmt_close($stmt);
+                        }
+                        $flash_talla_err = 'Error al eliminar la talla (código ' . (int)$ex->getCode() . ').';
                     }
-                    $flash_talla_err = 'Error al eliminar la talla (código ' . (int)$ex->getCode() . ').';
                 }
             }
         }
 
         if ($_POST['accion_talla'] === 'upd') {
-            $id_var = (int)($_POST['id_variante'] ?? 0);
-            // Normaliza y valida la nueva talla
-            $talla_in = $norm_talla($_POST['talla'] ?? '');
-
-            if ($id_var <= 0) {
-                $flash_talla_err = 'ID de variante inválido.';
-            } elseif ($talla_in === '') {
-                $flash_talla_err = 'La talla es obligatoria.';
-                $talla_in = '';
-            } elseif (!preg_match('/^[A-Z0-9ÁÉÍÓÚÜÑ\-\.\/ ]{1,20}$/u', $talla_in)) {
-                $flash_talla_err = 'La talla contiene caracteres no permitidos.';
-                $talla_in = '';
+            if ($bloquear_tallas) {
+                $flash_talla_err = 'Este producto no maneja tallas. No puedes agregar/editar/eliminar tallas.';
             } else {
-                // UPDATE seguro: solo si pertenece a este equipo
-                $stmt = mysqli_prepare($cn, "
-            UPDATE item_variantes
-               SET talla = ?
-             WHERE id_variante = ? AND id_equipo = ?
-             LIMIT 1
-        ");
-                mysqli_stmt_bind_param($stmt, 'sii', $talla_in, $id_var, $id);
+                $id_var   = (int)($_POST['id_variante'] ?? 0);
+                $talla_in = $norm_talla($_POST['talla'] ?? '');
 
-                try {
-                    $ok  = mysqli_stmt_execute($stmt);
-                    $aff = mysqli_affected_rows($cn);
-                    mysqli_stmt_close($stmt);
+                if ($id_var <= 0) {
+                    $flash_talla_err = 'ID de variante inválido.';
+                } elseif ($talla_in === '') {
+                    $flash_talla_err = 'La talla es obligatoria.';
+                } elseif (!preg_match('/^[A-Z0-9ÁÉÍÓÚÜÑ\-\.\/ ]{1,20}$/u', $talla_in)) {
+                    $flash_talla_err = 'La talla contiene caracteres no permitidos.';
+                } else {
+                    $stmt = mysqli_prepare($cn, "
+                UPDATE item_variantes
+                   SET talla = ?
+                 WHERE id_variante = ? AND id_equipo = ?
+                 LIMIT 1
+            ");
+                    mysqli_stmt_bind_param($stmt, 'sii', $talla_in, $id_var, $id);
 
-                    // Nota: $aff puede ser 0 si no cambió (misma talla); lo consideramos OK.
-                    if ($ok && $aff >= 0) {
-                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                        header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=updated');
-                        exit;
-                    } else {
-                        $flash_talla_err = 'No se pudo actualizar (¿no existe o no pertenece a este producto?).';
-                    }
-                } catch (mysqli_sql_exception $ex) {
-                    if (isset($stmt)) {
+                    try {
+                        $ok  = mysqli_stmt_execute($stmt);
+                        $aff = mysqli_affected_rows($cn);
                         mysqli_stmt_close($stmt);
+
+                        // Si no cambió (misma talla), $aff puede ser 0; lo consideramos OK.
+                        if ($ok && $aff >= 0) {
+                            $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                            header('Location: editar.php?id=' . urlencode((string)$id) . '&t_status=updated');
+                            exit;
+                        } else {
+                            $flash_talla_err = 'No se pudo actualizar (¿no existe o no pertenece a este producto?).';
+                        }
+                    } catch (mysqli_sql_exception $ex) {
+                        if (isset($stmt)) {
+                            mysqli_stmt_close($stmt);
+                        }
+                        if ((int)$ex->getCode() === 1062) {
+                            $flash_talla_err = 'Ya existe esa talla para este producto.';
+                        } else {
+                            $flash_talla_err = 'Error al actualizar la talla (código ' . (int)$ex->getCode() . ').';
+                        }
+                        $talla_in = '';
                     }
-                    if ((int)$ex->getCode() === 1062) {
-                        $flash_talla_err = 'Ya existe esa talla para este producto.';
-                    } else {
-                        $flash_talla_err = 'Error al actualizar la talla (código ' . (int)$ex->getCode() . ').';
-                    }
-                    $talla_in = '';
                 }
             }
         }

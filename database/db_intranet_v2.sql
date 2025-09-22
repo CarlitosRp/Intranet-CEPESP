@@ -157,13 +157,15 @@ CREATE TABLE IF NOT EXISTS print_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-
 INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 -- Botas
 ('BOTA-12401', 'Bota táctica color negro marca 5.11', '12401', 'Calzado', 1),
 
--- Pantalones
+-- Pantalones (caballero)
 ('PANT-74369', 'Pantalón táctico caballero azul marino', '74369', 'Uniforme', 1),
+
+-- Pantalones (dama)
+('PANT-643886', 'Pantalón táctico dama azul marino', '643886', 'Uniforme', 1),
 
 -- Camisas (caballero)
 ('CAM-72175', 'Camisa táctica 5.11 caballero Dark Navy', '72175', 'Uniforme', 1),
@@ -183,12 +185,12 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 ('PORTA-ARMA-L', 'Porta cargador arma larga (pouch)', NULL, 'Accesorio', 0),
 ('PORTA-ARMA-C', 'Porta cargador arma corta (Milfort)', NULL, 'Accesorio', 0),
 ('CINT-001', 'Cinturón militar (G&P Outdoor Belt)', NULL, 'Accesorio', 1),
-('PAGA-001', 'Paga montaña táctico', NULL, 'Accesorio', 0),
+('PASA-001', 'Paga montaña táctico', NULL, 'Accesorio', 0),
 ('PORTA-ESP-001', 'Porta esposa plástico (Milfort)', NULL, 'Accesorio', 0),
 ('PORTA-FUS-001', 'Porta fusil táctico 3 puntos', NULL, 'Accesorio', 0),
 ('CODERA-001', 'Par de coderas tácticas (FX Tactical)', NULL, 'Protección', 1),
 ('RODILLERA-001', 'Par de rodilleras tácticas (FX Tactical)', NULL, 'Protección', 1),
-('GOGGLE-001', 'Goggle táctico (FX Tactical)', NULL, 'Protección', 1),
+('GOOGLE-001', 'Goggle táctico (FX Tactical)', NULL, 'Protección', 1),
 ('GUANTE-001', 'Guantes tácticos (PMT)', NULL, 'Protección', 1);
 
 
@@ -198,21 +200,66 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
    ========================================= */
 
 /* --- BOTAS tácticas 5.11 modelo 12401 (6–10) --- */
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '4'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7' FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7 1/2'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8 1/2'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '9'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10' FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '9 1/2' FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '11'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '11 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '12' FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '13'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '14'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '15'  FROM equipo WHERE codigo='BOTA-12401';
 
 /* --- PANTALÓN táctico caballero azul marino 74369 (waist*length) --- */
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*30' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*30' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*34' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*30' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*32' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*30' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*30' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*34' FROM equipo WHERE codigo='PANT-74369';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '44*32' FROM equipo WHERE codigo='PANT-74369';
+
+/* --- PANTALÓN táctico dama azul marino 643886 (waist*length) --- */
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '2 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '4 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '12 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '14 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '16 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '18 R' FROM equipo WHERE codigo='PANT-643886';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '20 R' FROM equipo WHERE codigo='PANT-643886';
 
 /* --- CAMISA táctica 5.11 caballero 72175 (S–XXXL) --- */
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S'    FROM equipo WHERE codigo='CAM-72175';
@@ -252,6 +299,6 @@ INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM 
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo='CINT-001';
 
 /* --- CODERAS / RODILLERAS / GOGGLE / GUANTES (ajustables; dejo S–L, cambia si son únicas) --- */
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOGGLE-001','GUANTE-001');
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOGGLE-001','GUANTE-001');
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOGGLE-001','GUANTE-001');
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');

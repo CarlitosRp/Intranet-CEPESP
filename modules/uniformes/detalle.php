@@ -1,57 +1,69 @@
 <?php
+// modules/uniformes/detalle.php
+
+require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../includes/db.php';
-header('Content-Type: text/html; charset=UTF-8');
+require_once __DIR__ . '/../../includes/auth.php';
 
-$cn = db();
+auth_require_login();
 
-// 1) Validar parámetro id (id_equipo)
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+}
+$csrf_token = $_SESSION['csrf_token'];
+
+$BASE = rtrim(BASE_URL, '/');
+
+// ------------ Input ------------
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) {
     http_response_code(400);
-    die('<div style="padding:16px;font-family:system-ui">Parámetro inválido.</div>');
+    exit('<div style="padding:16px;font-family:system-ui">ID inválido.</div>');
 }
 
-// 2) Leer datos del equipo (cabecera)
-$sqlEquipo = "
-  SELECT
-    e.id_equipo,
-    e.codigo,
-    e.descripcion,
-    e.modelo,
-    e.categoria,
-    e.maneja_talla
-  FROM equipo e
-  WHERE e.id_equipo = $id
+// ------------ Datos del producto ------------
+$cn = db();
+$rows = db_select_all("
+  SELECT id_equipo, codigo, descripcion, modelo, categoria, maneja_talla, IFNULL(activo,0) AS activo
+  FROM equipo
+  WHERE id_equipo = $id
   LIMIT 1
-";
-$info = db_select_all($sqlEquipo);
-if (isset($info['_error'])) {
+");
+if (isset($rows['_error'])) {
     http_response_code(500);
-    die('<div style="padding:16px;font-family:system-ui">Error: ' . htmlspecialchars($info['_error']) . '</div>');
+    exit('<div style="padding:16px;font-family:system-ui">Error al consultar el producto.</div>');
 }
-if (!$info) {
+if (!$rows) {
     http_response_code(404);
-    die('<div style="padding:16px;font-family:system-ui">No se encontró el equipo solicitado.</div>');
+    exit('<div style="padding:16px;font-family:system-ui">Producto no encontrado.</div>');
 }
-$e = $info[0];
+$e = $rows[0];
 
-// 3) Leer variantes (tallas) del equipo
-$sqlVars = "
-  SELECT v.talla
-  FROM item_variantes v
-  WHERE v.id_equipo = $id
-  ORDER BY v.talla
-";
-$vars = db_select_all($sqlVars);
-$hayErrorVars = isset($vars['_error']);
+// ------------ Tallas (solo lectura aquí) ------------
+$vars = db_select_all("
+  SELECT id_variante, talla, IFNULL(activo,1) AS activo
+  FROM item_variantes
+  WHERE id_equipo = $id
+  ORDER BY talla
+");
+if (isset($vars['_error'])) $vars = [];
+
+// ------------ Permisos ------------
+$canEdit   = auth_has_role('admin') || auth_has_role('inventarios') || auth_has_role('almacen');
+$canDelete = $canEdit;
+$canToggle = $canEdit;
 ?>
 <!doctype html>
 <html lang="es">
 
 <head>
     <meta charset="utf-8">
-    <title>Uniformes · Detalle de <?= htmlspecialchars($e['codigo']) ?></title>
-    <link rel="stylesheet" href="/intranet-CEPESP/assets/css/bootstrap.min.css">
+    <title>Uniformes · Detalle de producto</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>/assets/css/bootstrap.min.css">
     <style>
         body {
             background: #f6f7f9
@@ -61,25 +73,24 @@ $hayErrorVars = isset($vars['_error']);
             border-radius: 12px
         }
 
-        dt {
-            width: 160px;
-        }
-
-        dd {
-            margin-left: 0;
-        }
-
-        .badge {
-            font-weight: 500;
+        .chip {
+            display: inline-block;
+            padding: .35rem .6rem;
+            border-radius: 999px;
+            background: #e7f1ff;
+            color: #0a58ca;
+            font-weight: 600;
+            margin: .125rem .25rem 0 0;
         }
     </style>
 </head>
 
 <body>
     <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php require_once __DIR__ . '/../../includes/breadcrumbs.php';
-    $BASE = rtrim(BASE_URL, '/');
+    <?php
+    require_once __DIR__ . '/../../includes/breadcrumbs.php';
     $URL_CATALOGO = $BASE . '/modules/uniformes/catalogo.php';
+    $URL_INDEX    = $BASE . '/modules/uniformes/index.php';
     render_breadcrumb([
         ['label' => 'Catálogo', 'href' => $URL_CATALOGO],
         ['label' => 'Detalle']
@@ -87,90 +98,113 @@ $hayErrorVars = isset($vars['_error']);
     ?>
     <div class="container py-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h5 mb-0">Uniformes · Detalle de producto</h1>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="h5 mb-0">Uniformes · Detalle de producto</h1>
-                <div class="d-flex gap-2">
-                    <a class="btn btn-outline-secondary btn-sm" href="catalogo.php">← Volver al catálogo</a>
-                    <a class="btn btn-outline-secondary btn-sm" href="index.php">Listado (no agrupado)</a>
-                    <a class="btn btn-primary btn-sm" href="editar.php?id=<?= urlencode($e['id_equipo']) ?>">✏️ Editar</a>
-                    <?php
-                    // Solo mostrar si el usuario tiene permiso
-                    $canDelete = auth_has_role('admin') || auth_has_role('inventarios') || auth_has_role('almacen');
-                    if (session_status() !== PHP_SESSION_ACTIVE) {
-                        session_start();
-                    }
-                    if (empty($_SESSION['csrf_token'])) {
-                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                    }
-                    $csrf_token = $_SESSION['csrf_token'];
-                    ?>
-
-                    <?php if ($canDelete): ?>
-                        <form method="post" action="eliminar.php" class="d-inline"
-                            onsubmit="return confirm('¿Eliminar definitivamente este producto? Esta acción no se puede deshacer.');">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="id_equipo" value="<?= (int)$e['id_equipo'] ?>">
-                            <button class="btn btn-danger">Eliminar</button>
-                        </form>
-                    <?php endif; ?>
-
-                </div>
-            </div>
-        </div>
-
+        <!-- Mensajes (auto-hide) -->
         <?php if (!empty($_GET['created'])): ?>
-            <div class="alert alert-success alert-dismissible fade show auto-hide" role="alert">
-                Producto creado correctamente.
+            <div class="alert alert-success alert-dismissible fade show auto-hide">Producto creado correctamente.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($_GET['updated'])): ?>
+            <div class="alert alert-success alert-dismissible fade show auto-hide">Producto actualizado.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($_GET['toggled'])): ?>
+            <div class="alert alert-success alert-dismissible fade show auto-hide">Estado del producto actualizado.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
         <?php endif; ?>
 
-        <!-- Cabecera del producto -->
-        <div class="card shadow-sm mb-3">
-            <div class="card-body">
-                <?php if (!empty($_GET['ok'])): ?>
-                    <div class="alert alert-success">Cambios guardados correctamente.</div>
+        <!-- Encabezado + acciones -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h5 mb-0">Uniformes · Detalle de producto</h1>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($URL_CATALOGO) ?>">← Volver al catálogo</a>
+                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($URL_INDEX) ?>">Listado (no agrupado)</a>
+
+                <?php if ($canEdit): ?>
+                    <a class="btn btn-primary btn-sm"
+                        href="<?= htmlspecialchars($BASE . '/modules/uniformes/editar.php?id=' . urlencode((string)$e['id_equipo'])) ?>">
+                        ✏️ Editar
+                    </a>
                 <?php endif; ?>
-                <h2 class="h6 mb-3">Producto</h2>
-                <dl class="row mb-0">
-                    <dt class="col-sm-3">Código</dt>
-                    <dd class="col-sm-9"><?= htmlspecialchars($e['codigo']) ?></dd>
-                    <dt class="col-sm-3">Descripción</dt>
-                    <dd class="col-sm-9"><?= htmlspecialchars($e['descripcion']) ?></dd>
-                    <dt class="col-sm-3">Modelo</dt>
-                    <dd class="col-sm-9"><?= htmlspecialchars($e['modelo']) ?></dd>
-                    <dt class="col-sm-3">Categoría</dt>
-                    <dd class="col-sm-9"><?= htmlspecialchars($e['categoria']) ?></dd>
-                    <dt class="col-sm-3">Maneja talla</dt>
-                    <dd class="col-sm-9">
-                        <?php
-                        $mt = (string)$e['maneja_talla'] === '1' ? 'Sí' : 'No';
-                        echo htmlspecialchars($mt);
-                        ?>
-                    </dd>
-                </dl>
+
+                <?php if ($canDelete): ?>
+                    <!-- ⛔ Eliminar (POST + CSRF + confirm) -->
+                    <form method="post"
+                        action="<?= htmlspecialchars($BASE . '/modules/uniformes/eliminar.php') ?>"
+                        class="d-inline"
+                        onsubmit="return confirm('¿Eliminar definitivamente este producto? Esta acción no se puede deshacer.');">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                        <input type="hidden" name="id_equipo" value="<?= (int)$e['id_equipo'] ?>">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
 
-        <!-- Variantes / Tallas como chips -->
+        <!-- Título + estado + toggle -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <h2 class="h5 mb-0"><?= htmlspecialchars($e['descripcion']) ?></h2>
+                <?php if ((int)$e['activo'] === 1): ?>
+                    <span class="badge text-bg-success">Activo</span>
+                <?php else: ?>
+                    <span class="badge text-bg-secondary">Inactivo</span>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($canToggle): ?>
+                <!-- 🔁 Activar/Desactivar (POST absoluto) -->
+                <form method="post"
+                    action="<?= htmlspecialchars($BASE . '/modules/uniformes/toggle_equipo.php') ?>"
+                    class="d-inline">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                    <input type="hidden" name="id_equipo" value="<?= (int)$e['id_equipo'] ?>">
+                    <?php if ((int)$e['activo'] === 1): ?>
+                        <button class="btn btn-outline-secondary btn-sm">Desactivar</button>
+                    <?php else: ?>
+                        <button class="btn btn-success btn-sm">Activar</button>
+                    <?php endif; ?>
+                </form>
+            <?php endif; ?>
+        </div>
+
+        <!-- Ficha -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-sm-6"><strong>Código</strong>
+                        <div><?= htmlspecialchars($e['codigo']) ?></div>
+                    </div>
+                    <div class="col-sm-6"><strong>Modelo</strong>
+                        <div><?= htmlspecialchars($e['modelo']) ?></div>
+                    </div>
+                    <div class="col-12"><strong>Descripción</strong>
+                        <div><?= htmlspecialchars($e['descripcion']) ?></div>
+                    </div>
+                    <div class="col-sm-6"><strong>Categoría</strong>
+                        <div><?= htmlspecialchars($e['categoria']) ?></div>
+                    </div>
+                    <div class="col-sm-6"><strong>Maneja talla</strong>
+                        <div><?= ((int)$e['maneja_talla'] === 1 ? 'Sí' : 'No') ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tallas -->
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="h6 mb-3">Tallas disponibles</h2>
-
-                <?php if ($hayErrorVars): ?>
-                    <div class="alert alert-danger">
-                        Error al consultar tallas: <?= htmlspecialchars($vars['_error']) ?>
-                    </div>
-                <?php elseif (!$vars): ?>
-                    <div class="alert alert-info">Este producto no tiene tallas registradas.</div>
+                <h3 class="h6">Tallas disponibles</h3>
+                <?php if (!$vars): ?>
+                    <div class="text-muted">No hay tallas registradas.</div>
                 <?php else: ?>
-                    <div>
-                        <?php foreach ($vars as $v): ?>
-                            <span class="badge text-bg-primary me-1 mb-1"><?= htmlspecialchars($v['talla']) ?></span>
-                        <?php endforeach; ?>
-                    </div>
+                    <?php foreach ($vars as $v): ?>
+                        <span class="chip" style="<?= (int)$v['activo'] === 1 ? '' : 'opacity:.5' ?>">
+                            <?= htmlspecialchars($v['talla']) ?>
+                        </span>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </div>
         </div>
