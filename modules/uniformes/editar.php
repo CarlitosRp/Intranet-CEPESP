@@ -83,6 +83,14 @@ if ($t_status === 'vtoggled') {
     $flash_talla_ok = 'Estado de la talla actualizado.';
 }
 
+// Mostrar alert para actualización/creación del PRODUCTO (no tallas)
+if (!empty($_GET['updated'])) { 
+    $flash_ok = 'Producto actualizado.'; 
+}
+if (!empty($_GET['created'])) { 
+    $flash_ok = 'Producto creado correctamente.'; 
+}
+
 // -------------------- HELPERS --------------------
 $norm_text = function (string $s): string {
     return trim($s);
