@@ -194,20 +194,31 @@ $canToggle = $canEdit;
         </div>
 
         <!-- Tallas -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="h6">Tallas disponibles</h3>
-                <?php if (!$vars): ?>
-                    <div class="text-muted">No hay tallas registradas.</div>
-                <?php else: ?>
-                    <?php foreach ($vars as $v): ?>
-                        <span class="chip" style="<?= (int)$v['activo'] === 1 ? '' : 'opacity:.5' ?>">
-                            <?= htmlspecialchars($v['talla']) ?>
-                        </span>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+        <?php if ((int)$e['maneja_talla'] === 1): ?>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="h6">Tallas disponibles</h3>
+                    <?php if (!$vars): ?>
+                        <div class="text-muted">No hay tallas registradas.</div>
+                    <?php else: ?>
+                        <?php foreach ($vars as $v): ?>
+                            <?php $inactive = ((int)$v['activo'] === 0); ?>
+                            <span class="chip" <?= $inactive ? 'style="opacity:.5"' : '' ?>>
+                                <?= htmlspecialchars($v['talla']) ?>
+                            </span>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
-        </div>
+        <?php else: ?>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="h6 mb-0">Tallas</h3>
+                    <div class="text-muted">Este producto no maneja tallas.</div>
+                </div>
+            </div>
+        <?php endif; ?>
+
 
     </div>
 
