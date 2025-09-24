@@ -115,7 +115,11 @@ render_breadcrumb([
                             <td class="text-nowrap">
                                 <!-- Próximo paso: ver/editar/eliminar -->
                                 <a class="btn btn-sm btn-outline-primary disabled" tabindex="-1">Ver</a>
-                                <a class="btn btn-sm btn-outline-secondary disabled" tabindex="-1">Editar</a>
+                                <a class="btn btn-sm btn-outline-secondary"
+                                    href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/editar.php?id=' . (int)$r['id_entrada']) ?>">
+                                    Editar
+                                </a>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>
