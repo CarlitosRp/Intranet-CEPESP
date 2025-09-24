@@ -82,146 +82,113 @@ if (isset($rows['_error'])) {
 }
 
 ?>
-<!doctype html>
-<html lang="es">
 
-<head>
-    <meta charset="utf-8">
-    <title>Uniformes · Catálogo</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>/assets/css/bootstrap.min.css">
-    <style>
-        body {
-            background: #f6f7f9
-        }
+<?php
+$page_title = 'Uniformes · Catálogo';
+require_once __DIR__ . '/../../includes/header.php';
 
-        .card {
-            border-radius: 12px;
-            height: 100%
-        }
+require_once __DIR__ . '/../../includes/breadcrumbs.php';
+render_breadcrumb([['label' => 'Catálogo']]);
+?>
 
-        .chip {
-            display: inline-block;
-            padding: .25rem .55rem;
-            border-radius: 999px;
-            background: #e7f1ff;
-            color: #0a58ca;
-            font-weight: 600;
-            margin: .125rem .25rem .125rem 0;
-            font-size: .85rem;
-        }
+<div class="container py-4">
 
-        .muted {
-            opacity: .6
-        }
-    </style>
-</head>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h5 mb-0">Uniformes · Catálogo</h1>
+        <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/uniformes/crear.php') ?>">Nuevo producto</a>
+    </div>
 
-<body>
-    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php
-    require_once __DIR__ . '/../../includes/breadcrumbs.php';
-    render_breadcrumb([['label' => 'Catálogo']]);
-    ?>
-
-    <div class="container py-4">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h5 mb-0">Uniformes · Catálogo</h1>
-            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/uniformes/crear.php') ?>">Nuevo producto</a>
+    <!-- Buscador -->
+    <form class="row g-2 mb-3" method="get" action="catalogo.php">
+        <div class="col-sm-8 col-md-9">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por código, descripción, modelo, categoría o talla"
+                value="<?= htmlspecialchars($q) ?>">
         </div>
+        <div class="col-sm-4 col-md-3 d-grid">
+            <button class="btn btn-outline-secondary">Buscar</button>
+        </div>
+    </form>
 
-        <!-- Buscador -->
-        <form class="row g-2 mb-3" method="get" action="catalogo.php">
-            <div class="col-sm-8 col-md-9">
-                <input type="text" name="q" class="form-control" placeholder="Buscar por código, descripción, modelo, categoría o talla"
-                    value="<?= htmlspecialchars($q) ?>">
-            </div>
-            <div class="col-sm-4 col-md-3 d-grid">
-                <button class="btn btn-outline-secondary">Buscar</button>
-            </div>
-        </form>
+    <?php if ($totalRows === 0): ?>
+        <div class="alert alert-light border">No se encontraron productos con ese criterio.</div>
+    <?php endif; ?>
 
-        <?php if ($totalRows === 0): ?>
-            <div class="alert alert-light border">No se encontraron productos con ese criterio.</div>
-        <?php endif; ?>
-
-        <!-- Grid de tarjetas -->
-        <div class="row g-3">
-            <?php foreach ($rows as $r): ?>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h2 class="h6 mb-2"><?= htmlspecialchars($r['descripcion']) ?></h2>
-                                <?php if ((int)$r['activo'] === 0): ?>
-                                    <span class="badge text-bg-secondary">Inactivo</span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="mb-2 text-muted small">
-                                <div><strong>Código:</strong> <?= htmlspecialchars($r['codigo']) ?></div>
-                                <div><strong>Modelo:</strong> <?= htmlspecialchars($r['modelo']) ?></div>
-                                <div><strong>Categoría:</strong> <?= htmlspecialchars($r['categoria']) ?></div>
-                            </div>
-
-                            <!-- Mostrar tallas solo si maneja_talla=1 -->
-                            <?php if ((int)$r['maneja_talla'] === 1): ?>
-                                <?php if (!empty($r['tallas'])): ?>
-                                    <div class="mb-2">
-                                        <?php foreach (explode(',', $r['tallas']) as $t): ?>
-                                            <?php $lbl = trim($t);
-                                            if ($lbl === '') continue; ?>
-                                            <span class="chip"><?= htmlspecialchars($lbl) ?></span>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <div class="text-muted small">Sin tallas activas.</div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <div class="text-muted small">No maneja tallas.</div>
+    <!-- Grid de tarjetas -->
+    <div class="row g-3">
+        <?php foreach ($rows as $r): ?>
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h2 class="h6 mb-2"><?= htmlspecialchars($r['descripcion']) ?></h2>
+                            <?php if ((int)$r['activo'] === 0): ?>
+                                <span class="badge text-bg-secondary">Inactivo</span>
                             <?php endif; ?>
+                        </div>
+                        <div class="mb-2 text-muted small">
+                            <div><strong>Código:</strong> <?= htmlspecialchars($r['codigo']) ?></div>
+                            <div><strong>Modelo:</strong> <?= htmlspecialchars($r['modelo']) ?></div>
+                            <div><strong>Categoría:</strong> <?= htmlspecialchars($r['categoria']) ?></div>
+                        </div>
 
-                            <div class="mt-3 d-flex gap-2">
-                                <a class="btn btn-sm btn-outline-primary" href="<?= htmlspecialchars($BASE . '/modules/uniformes/detalle.php?id=' . (int)$r['id_equipo']) ?>">Ver detalle</a>
-                                <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($BASE . '/modules/uniformes/editar.php?id=' . (int)$r['id_equipo']) ?>">Editar</a>
-                            </div>
+                        <!-- Mostrar tallas solo si maneja_talla=1 -->
+                        <?php if ((int)$r['maneja_talla'] === 1): ?>
+                            <?php if (!empty($r['tallas'])): ?>
+                                <div class="mb-2">
+                                    <?php foreach (explode(',', $r['tallas']) as $t): ?>
+                                        <?php $lbl = trim($t);
+                                        if ($lbl === '') continue; ?>
+                                        <span class="chip"><?= htmlspecialchars($lbl) ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="text-muted small">Sin tallas activas.</div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="text-muted small">No maneja tallas.</div>
+                        <?php endif; ?>
+
+                        <div class="mt-3 d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary" href="<?= htmlspecialchars($BASE . '/modules/uniformes/detalle.php?id=' . (int)$r['id_equipo']) ?>">Ver detalle</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($BASE . '/modules/uniformes/editar.php?id=' . (int)$r['id_equipo']) ?>">Editar</a>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Paginación -->
-        <?php if ($totalPages > 1): ?>
-            <nav class="mt-3" aria-label="Paginación">
-                <ul class="pagination pagination-sm">
-                    <?php
-                    // Helper simple para mantener q en los enlaces
-                    $baseUrl = 'catalogo.php';
-                    $qs = [];
-                    if ($q !== '') $qs['q'] = $q;
-                    $mk = function ($p) use ($baseUrl, $qs) {
-                        $qs2 = $qs;
-                        $qs2['page'] = $p;
-                        return $baseUrl . '?' . http_build_query($qs2);
-                    };
-                    ?>
-                    <li class="page-item <?= ($page <= 1 ? 'disabled' : '') ?>">
-                        <a class="page-link" href="<?= ($page <= 1 ? '#' : htmlspecialchars($mk($page - 1))) ?>" tabindex="-1">« Anterior</a>
-                    </li>
-                    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                        <li class="page-item <?= ($p === $page ? 'active' : '') ?>">
-                            <a class="page-link" href="<?= htmlspecialchars($mk($p)) ?>"><?= $p ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    <li class="page-item <?= ($page >= $totalPages ? 'disabled' : '') ?>">
-                        <a class="page-link" href="<?= ($page >>= $totalPages ? '#' : htmlspecialchars($mk($page + 1))) ?>">Siguiente »</a>
-                    </li>
-                </ul>
-            </nav>
-            <p class="text-muted small">Mostrando <?= count($rows) ?> de <?= $totalRows ?> productos.</p>
-        <?php endif; ?>
-
+            </div>
+        <?php endforeach; ?>
     </div>
 
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    <!-- Paginación -->
+    <?php if ($totalPages > 1): ?>
+        <nav class="mt-3" aria-label="Paginación">
+            <ul class="pagination pagination-sm">
+                <?php
+                // Helper simple para mantener q en los enlaces
+                $baseUrl = 'catalogo.php';
+                $qs = [];
+                if ($q !== '') $qs['q'] = $q;
+                $mk = function ($p) use ($baseUrl, $qs) {
+                    $qs2 = $qs;
+                    $qs2['page'] = $p;
+                    return $baseUrl . '?' . http_build_query($qs2);
+                };
+                ?>
+                <li class="page-item <?= ($page <= 1 ? 'disabled' : '') ?>">
+                    <a class="page-link" href="<?= ($page <= 1 ? '#' : htmlspecialchars($mk($page - 1))) ?>" tabindex="-1">« Anterior</a>
+                </li>
+                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                    <li class="page-item <?= ($p === $page ? 'active' : '') ?>">
+                        <a class="page-link" href="<?= htmlspecialchars($mk($p)) ?>"><?= $p ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?= ($page >= $totalPages ? 'disabled' : '') ?>">
+                    <a class="page-link" href="<?= ($page >>= $totalPages ? '#' : htmlspecialchars($mk($page + 1))) ?>">Siguiente »</a>
+                </li>
+            </ul>
+        </nav>
+        <p class="text-muted small">Mostrando <?= count($rows) ?> de <?= $totalRows ?> productos.</p>
+    <?php endif; ?>
+
+</div>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

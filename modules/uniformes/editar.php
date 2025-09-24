@@ -84,11 +84,11 @@ if ($t_status === 'vtoggled') {
 }
 
 // Mostrar alert para actualización/creación del PRODUCTO (no tallas)
-if (!empty($_GET['updated'])) { 
-    $flash_ok = 'Producto actualizado.'; 
+if (!empty($_GET['updated'])) {
+    $flash_ok = 'Producto actualizado.';
 }
-if (!empty($_GET['created'])) { 
-    $flash_ok = 'Producto creado correctamente.'; 
+if (!empty($_GET['created'])) {
+    $flash_ok = 'Producto creado correctamente.';
 }
 
 // -------------------- HELPERS --------------------
@@ -367,216 +367,198 @@ if ($isPost && isset($_POST['accion_talla'])) {
 }
 
 ?>
-<!doctype html>
-<html lang="es">
 
-<head>
-    <meta charset="utf-8">
-    <title>Uniformes · Editar producto</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>/assets/css/bootstrap.min.css">
-    <style>
-        body {
-            background: #f6f7f9
-        }
+<?php
+$page_title = 'Uniformes · Editar producto';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../includes/breadcrumbs.php';
+$URL_DETALLE = $BASE . '/modules/uniformes/detalle.php?id=' . urlencode((string)$e['id_equipo']);
+render_breadcrumb([
+    ['label' => 'Detalle', 'href' => $URL_DETALLE],
+    ['label' => 'Editar']
+]);
+?>
 
-        .card {
-            border-radius: 12px
-        }
-    </style>
-</head>
+<div class="container py-4">
 
-<body>
-    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php
-    require_once __DIR__ . '/../../includes/breadcrumbs.php';
-    $URL_DETALLE = $BASE . '/modules/uniformes/detalle.php?id=' . urlencode((string)$e['id_equipo']);
-    render_breadcrumb([
-        ['label' => 'Detalle', 'href' => $URL_DETALLE],
-        ['label' => 'Editar']
-    ]);
-    ?>
-
-    <div class="container py-4">
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h5 mb-0">Uniformes · Editar producto</h1>
-            <div class="d-flex gap-2">
-                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($URL_DETALLE) ?>">← Volver al detalle</a>
-                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/uniformes/catalogo.php') ?>">Catálogo</a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h5 mb-0">Uniformes · Editar producto</h1>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($URL_DETALLE) ?>">← Volver al detalle</a>
+            <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/uniformes/catalogo.php') ?>">Catálogo</a>
         </div>
-
-        <?php if ($flash_ok): ?>
-            <div class="alert alert-success alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_ok) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        <?php endif; ?>
-        <?php if ($flash_err): ?>
-            <div class="alert alert-danger alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_err) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        <?php endif; ?>
-
-        <!-- ======= FORM PRODUCTO ======= -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <div class="alert alert-light border mb-3">
-                    Revisa los campos marcados en rojo.
-                </div>
-
-                <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label">Código</label>
-                            <input type="text" name="codigo" class="form-control"
-                                value="<?= htmlspecialchars($e['codigo']) ?>" required>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <label class="form-label">Modelo</label>
-                            <input type="text" name="modelo" class="form-control"
-                                value="<?= htmlspecialchars($e['modelo']) ?>" required>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Descripción</label>
-                            <input type="text" name="descripcion" class="form-control"
-                                value="<?= htmlspecialchars($e['descripcion']) ?>" required>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <label class="form-label">Categoría</label>
-                            <input type="text" name="categoria" class="form-control"
-                                value="<?= htmlspecialchars($e['categoria']) ?>" required>
-                        </div>
-
-                        <div class="col-sm-6 d-flex align-items-end">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="chkMT" name="maneja_talla"
-                                    <?= ((int)$e['maneja_talla'] === 1) ? 'checked' : '' ?>>
-                                <label class="form-check-label" for="chkMT">Maneja talla</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 d-flex gap-2">
-                        <button class="btn btn-primary">Guardar</button>
-                        <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($URL_DETALLE) ?>">Cancelar</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- ======= TALLAS ======= -->
-        <?php if ($flash_talla_ok): ?>
-            <div class="alert alert-success alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_talla_ok) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        <?php endif; ?>
-        <?php if ($flash_talla_err): ?>
-            <div class="alert alert-danger alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_talla_err) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        <?php endif; ?>
-
-        <?php if ((int)$e['maneja_talla'] === 1): ?>
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="h6 mb-3">Tallas</h2>
-
-                    <!-- Agregar talla -->
-                    <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="mb-3">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                        <input type="hidden" name="accion_talla" value="add">
-                        <div class="input-group" style="max-width:420px;">
-                            <input type="text" name="talla" class="form-control" placeholder="Ej.: CH, M, 26, ÚNICA" maxlength="20">
-                            <button class="btn btn-primary">Agregar talla</button>
-                        </div>
-                        <div class="form-text">Se normaliza en MAYÚSCULAS. No se permiten caracteres especiales raros.</div>
-                    </form>
-
-                    <!-- Tabla de tallas -->
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th style="width:60px">#</th>
-                                    <th>Talla</th>
-                                    <th style="width:260px">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php $i = 1;
-                                foreach ($vars as $v): ?>
-                                    <?php
-                                    $activoVar      = (int)($v['activo'] ?? 1);
-                                    $rowClass       = ($activoVar === 1) ? '' : ' class="text-muted"';
-                                    $toggleLabel    = ($activoVar === 1) ? 'Desactivar' : 'Activar';
-                                    $toggleBtnClass = ($activoVar === 1) ? 'btn-outline-secondary' : 'btn-success';
-                                    ?>
-                                    <tr<?= $rowClass ?>>
-                                        <td><?= $i++ ?></td>
-
-                                        <!-- Actualizar talla -->
-                                        <td>
-                                            <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="d-inline">
-                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                                                <input type="hidden" name="accion_talla" value="upd">
-                                                <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
-                                                <div class="input-group input-group-sm" style="max-width:280px;">
-                                                    <input type="text" name="talla" class="form-control"
-                                                        value="<?= htmlspecialchars($v['talla']) ?>" maxlength="20" required>
-                                                    <button class="btn btn-success">Guardar</button>
-                                                </div>
-                                            </form>
-                                        </td>
-
-                                        <!-- Acciones -->
-                                        <td class="text-nowrap">
-                                            <!-- Toggle -->
-                                            <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="d-inline">
-                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                                                <input type="hidden" name="accion_talla" value="toggle">
-                                                <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
-                                                <button class="btn btn-sm <?= $toggleBtnClass ?>" title="<?= $toggleLabel ?> talla">
-                                                    <?= $toggleLabel ?>
-                                                </button>
-                                            </form>
-
-                                            <!-- Eliminar -->
-                                            <form method="post"
-                                                action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>"
-                                                onsubmit="return confirm('¿Eliminar la talla <?= htmlspecialchars($v['talla']) ?>?');"
-                                                class="d-inline">
-                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                                                <input type="hidden" name="accion_talla" value="del">
-                                                <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
-                                                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                            </form>
-                                        </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            </div>
-        <?php else: ?>
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="h6 mb-3">Tallas</h2>
-                    <div class="alert alert-info mb-0">
-                        Este producto <strong>no maneja tallas</strong>. Para habilitar esta sección,
-                        marca “Maneja talla” y guarda los cambios del producto.
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
     </div>
 
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+    <?php if ($flash_ok): ?>
+        <div class="alert alert-success alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_ok) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    <?php endif; ?>
+    <?php if ($flash_err): ?>
+        <div class="alert alert-danger alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_err) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- ======= FORM PRODUCTO ======= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="alert alert-light border mb-3">
+                Revisa los campos marcados en rojo.
+            </div>
+
+            <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label">Código</label>
+                        <input type="text" name="codigo" class="form-control"
+                            value="<?= htmlspecialchars($e['codigo']) ?>" required>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" name="modelo" class="form-control"
+                            value="<?= htmlspecialchars($e['modelo']) ?>" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" name="descripcion" class="form-control"
+                            value="<?= htmlspecialchars($e['descripcion']) ?>" required>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Categoría</label>
+                        <input type="text" name="categoria" class="form-control"
+                            value="<?= htmlspecialchars($e['categoria']) ?>" required>
+                    </div>
+
+                    <div class="col-sm-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chkMT" name="maneja_talla"
+                                <?= ((int)$e['maneja_talla'] === 1) ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="chkMT">Maneja talla</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-primary">Guardar</button>
+                    <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($URL_DETALLE) ?>">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======= TALLAS ======= -->
+    <?php if ($flash_talla_ok): ?>
+        <div class="alert alert-success alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_talla_ok) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    <?php endif; ?>
+    <?php if ($flash_talla_err): ?>
+        <div class="alert alert-danger alert-dismissible fade show auto-hide"><?= htmlspecialchars($flash_talla_err) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ((int)$e['maneja_talla'] === 1): ?>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Tallas</h2>
+
+                <!-- Agregar talla -->
+                <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="mb-3">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                    <input type="hidden" name="accion_talla" value="add">
+                    <div class="input-group" style="max-width:420px;">
+                        <input type="text" name="talla" class="form-control" placeholder="Ej.: CH, M, 26, ÚNICA" maxlength="20">
+                        <button class="btn btn-primary">Agregar talla</button>
+                    </div>
+                    <div class="form-text">Se normaliza en MAYÚSCULAS. No se permiten caracteres especiales raros.</div>
+                </form>
+
+                <!-- Tabla de tallas -->
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width:60px">#</th>
+                                <th>Talla</th>
+                                <th style="width:260px">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $i = 1;
+                            foreach ($vars as $v): ?>
+                                <?php
+                                $activoVar      = (int)($v['activo'] ?? 1);
+                                $rowClass       = ($activoVar === 1) ? '' : ' class="text-muted"';
+                                $toggleLabel    = ($activoVar === 1) ? 'Desactivar' : 'Activar';
+                                $toggleBtnClass = ($activoVar === 1) ? 'btn-outline-secondary' : 'btn-success';
+                                ?>
+                                <tr<?= $rowClass ?>>
+                                    <td><?= $i++ ?></td>
+
+                                    <!-- Actualizar talla -->
+                                    <td>
+                                        <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="accion_talla" value="upd">
+                                            <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
+                                            <div class="input-group input-group-sm" style="max-width:280px;">
+                                                <input type="text" name="talla" class="form-control"
+                                                    value="<?= htmlspecialchars($v['talla']) ?>" maxlength="20" required>
+                                                <button class="btn btn-success">Guardar</button>
+                                            </div>
+                                        </form>
+                                    </td>
+
+                                    <!-- Acciones -->
+                                    <td class="text-nowrap">
+                                        <!-- Toggle -->
+                                        <form method="post" action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>" class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="accion_talla" value="toggle">
+                                            <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
+                                            <button class="btn btn-sm <?= $toggleBtnClass ?>" title="<?= $toggleLabel ?> talla">
+                                                <?= $toggleLabel ?>
+                                            </button>
+                                        </form>
+
+                                        <!-- Eliminar -->
+                                        <form method="post"
+                                            action="editar.php?id=<?= urlencode((string)$e['id_equipo']) ?>"
+                                            onsubmit="return confirm('¿Eliminar la talla <?= htmlspecialchars($v['talla']) ?>?');"
+                                            class="d-inline">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="accion_talla" value="del">
+                                            <input type="hidden" name="id_variante" value="<?= (int)$v['id_variante'] ?>">
+                                            <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                        </form>
+                                    </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h6 mb-3">Tallas</h2>
+                <div class="alert alert-info mb-0">
+                    Este producto <strong>no maneja tallas</strong>. Para habilitar esta sección,
+                    marca “Maneja talla” y guarda los cambios del producto.
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+</div>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -128,123 +128,101 @@ if ($isPost) {
 }
 
 ?>
-<!doctype html>
-<html lang="es">
 
-<head>
-    <meta charset="utf-8">
-    <title>Uniformes · Crear producto</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/intranet-CEPESP/assets/css/bootstrap.min.css">
-    <style>
-        body {
-            background: #f6f7f9
-        }
+<?php
+$page_title = 'Uniformes · Crear producto';
+require_once __DIR__ . '/../../includes/header.php';
+require_once __DIR__ . '/../../includes/breadcrumbs.php';
+$BASE = rtrim(BASE_URL, '/');
+$URL_LISTADO  = $BASE . '/modules/uniformes/index.php';
+render_breadcrumb([
+    ['label' => 'Listado', 'href' => $URL_LISTADO],
+    ['label' => 'Crear']
+]);
+?>
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="h5 mb-3">Crear producto</h1>
 
-        .card {
-            border-radius: 12px
-        }
+            <?php if (!empty($errores['general'])): ?>
+                <div class="alert alert-danger"><?= htmlspecialchars($errores['general']) ?></div>
+            <?php endif; ?>
+            <?php if ($flash_error): ?>
+                <div class="alert alert-danger"><?= htmlspecialchars($flash_error) ?></div>
+            <?php endif; ?>
 
-        .form-text {
-            font-size: .86rem
-        }
-    </style>
-</head>
+            <form method="post" action="crear.php" novalidate>
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
-<body>
-    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
-    <?php
-    require_once __DIR__ . '/../../includes/breadcrumbs.php';
-    $BASE = rtrim(BASE_URL, '/');
-    $URL_LISTADO  = $BASE . '/modules/uniformes/index.php';
-    render_breadcrumb([
-        ['label' => 'Listado', 'href' => $URL_LISTADO],
-        ['label' => 'Crear']
-    ]);
-    ?>
-    <div class="container py-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h1 class="h5 mb-3">Crear producto</h1>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label">Código</label>
+                        <input type="text" name="codigo" class="form-control <?= isset($errores['codigo']) ? 'is-invalid' : '' ?>"
+                            value="<?= htmlspecialchars($codigo) ?>" required>
+                        <?php if (isset($errores['codigo'])): ?>
+                            <div class="invalid-feedback"><?= htmlspecialchars($errores['codigo']) ?></div>
+                        <?php else: ?>
+                            <div class="form-text">Ej.: PANT-74369, BOTA-12401</div>
+                        <?php endif; ?>
+                    </div>
 
-                <?php if (!empty($errores['general'])): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($errores['general']) ?></div>
-                <?php endif; ?>
-                <?php if ($flash_error): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($flash_error) ?></div>
-                <?php endif; ?>
+                    <div class="col-sm-6">
+                        <label class="form-label">Modelo</label>
+                        <input type="text" name="modelo" class="form-control <?= isset($errores['modelo']) ? 'is-invalid' : '' ?>"
+                            value="<?= htmlspecialchars($modelo) ?>" required>
+                        <?php if (isset($errores['modelo'])): ?>
+                            <div class="invalid-feedback"><?= htmlspecialchars($errores['modelo']) ?></div>
+                        <?php endif; ?>
+                    </div>
 
-                <form method="post" action="crear.php" novalidate>
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                    <div class="col-12">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" name="descripcion" class="form-control <?= isset($errores['descripcion']) ? 'is-invalid' : '' ?>"
+                            value="<?= htmlspecialchars($descripcion) ?>" required>
+                        <?php if (isset($errores['descripcion'])): ?>
+                            <div class="invalid-feedback"><?= htmlspecialchars($errores['descripcion']) ?></div>
+                        <?php endif; ?>
+                    </div>
 
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <label class="form-label">Código</label>
-                            <input type="text" name="codigo" class="form-control <?= isset($errores['codigo']) ? 'is-invalid' : '' ?>"
-                                value="<?= htmlspecialchars($codigo) ?>" required>
-                            <?php if (isset($errores['codigo'])): ?>
-                                <div class="invalid-feedback"><?= htmlspecialchars($errores['codigo']) ?></div>
-                            <?php else: ?>
-                                <div class="form-text">Ej.: PANT-74369, BOTA-12401</div>
-                            <?php endif; ?>
-                        </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Categoría</label>
+                        <input type="text" name="categoria" class="form-control <?= isset($errores['categoria']) ? 'is-invalid' : '' ?>"
+                            value="<?= htmlspecialchars($categoria) ?>" required>
+                        <?php if (!isset($errores['categoria'])): ?>
+                            <div class="form-text">Ej.: Uniforme, Calzado, Accesorio…</div>
+                        <?php else: ?>
+                            <div class="invalid-feedback"><?= htmlspecialchars($errores['categoria']) ?></div>
+                        <?php endif; ?>
+                    </div>
 
-                        <div class="col-sm-6">
-                            <label class="form-label">Modelo</label>
-                            <input type="text" name="modelo" class="form-control <?= isset($errores['modelo']) ? 'is-invalid' : '' ?>"
-                                value="<?= htmlspecialchars($modelo) ?>" required>
-                            <?php if (isset($errores['modelo'])): ?>
-                                <div class="invalid-feedback"><?= htmlspecialchars($errores['modelo']) ?></div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="col-12">
-                            <label class="form-label">Descripción</label>
-                            <input type="text" name="descripcion" class="form-control <?= isset($errores['descripcion']) ? 'is-invalid' : '' ?>"
-                                value="<?= htmlspecialchars($descripcion) ?>" required>
-                            <?php if (isset($errores['descripcion'])): ?>
-                                <div class="invalid-feedback"><?= htmlspecialchars($errores['descripcion']) ?></div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <label class="form-label">Categoría</label>
-                            <input type="text" name="categoria" class="form-control <?= isset($errores['categoria']) ? 'is-invalid' : '' ?>"
-                                value="<?= htmlspecialchars($categoria) ?>" required>
-                            <?php if (!isset($errores['categoria'])): ?>
-                                <div class="form-text">Ej.: Uniforme, Calzado, Accesorio…</div>
-                            <?php else: ?>
-                                <div class="invalid-feedback"><?= htmlspecialchars($errores['categoria']) ?></div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="col-sm-6 d-flex align-items-end">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="chkMT" name="maneja_talla" <?= $maneja_talla === '1' ? 'checked' : '' ?>>
-                                <label class="form-check-label" for="chkMT">Maneja talla</label>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <label class="form-label">Talla inicial (opcional)</label>
-                            <input type="text" name="talla_inicial" class="form-control <?= isset($errores['talla_inicial']) ? 'is-invalid' : '' ?>"
-                                value="<?= htmlspecialchars($talla_inicial) ?>" maxlength="20" placeholder="Ej.: CH, 26, ÚNICA">
-                            <?php if (isset($errores['talla_inicial'])): ?>
-                                <div class="invalid-feedback"><?= htmlspecialchars($errores['talla_inicial']) ?></div>
-                            <?php else: ?>
-                                <div class="form-text">Se normaliza en MAYÚSCULAS.</div>
-                            <?php endif; ?>
+                    <div class="col-sm-6 d-flex align-items-end">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chkMT" name="maneja_talla" <?= $maneja_talla === '1' ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="chkMT">Maneja talla</label>
                         </div>
                     </div>
 
-                    <hr class="my-4">
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary">Crear</button>
-                        <a class="btn btn-outline-secondary" href="index.php">Cancelar</a>
+                    <div class="col-sm-6">
+                        <label class="form-label">Talla inicial (opcional)</label>
+                        <input type="text" name="talla_inicial" class="form-control <?= isset($errores['talla_inicial']) ? 'is-invalid' : '' ?>"
+                            value="<?= htmlspecialchars($talla_inicial) ?>" maxlength="20" placeholder="Ej.: CH, 26, ÚNICA">
+                        <?php if (isset($errores['talla_inicial'])): ?>
+                            <div class="invalid-feedback"><?= htmlspecialchars($errores['talla_inicial']) ?></div>
+                        <?php else: ?>
+                            <div class="form-text">Se normaliza en MAYÚSCULAS.</div>
+                        <?php endif; ?>
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <hr class="my-4">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary">Crear</button>
+                    <a class="btn btn-outline-secondary" href="index.php">Cancelar</a>
+                </div>
+            </form>
         </div>
     </div>
-    
-    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+</div>
+
+<?php require_once __DIR__ . '/../../includes/footer.php'; ?>

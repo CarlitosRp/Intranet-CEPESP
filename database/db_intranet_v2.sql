@@ -190,7 +190,7 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 ('PORTA-FUS-001', 'Porta fusil táctico 3 puntos', NULL, 'Accesorio', 0),
 ('CODERA-001', 'Par de coderas tácticas (FX Tactical)', NULL, 'Protección', 1),
 ('RODILLERA-001', 'Par de rodilleras tácticas (FX Tactical)', NULL, 'Protección', 1),
-('GOOGLE-001', 'Goggle táctico (FX Tactical)', NULL, 'Protección', 1),
+('GOOGLE-001', 'Google táctico (FX Tactical)', NULL, 'Protección', 1),
 ('GUANTE-001', 'Guantes tácticos (PMT)', NULL, 'Protección', 1);
 
 
