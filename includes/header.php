@@ -20,6 +20,7 @@ $extra_css = $extra_css ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap LOCAL -->
     <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>/assets/css/style.css">
     <?php foreach ($extra_css as $css): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($css) ?>">
     <?php endforeach; ?>
