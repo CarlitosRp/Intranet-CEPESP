@@ -238,6 +238,9 @@ if (!empty($_GET['d_del'])) {
 if (!empty($_GET['created'])) {
     $flash_ok = 'Entrada creada. Ahora agrega partidas.';
 }
+if (!empty($_GET['h_upd'])) {
+    $flash_ok = 'Cabecera actualizada.';}
+
 
 // ===== 4) Cargar partidas =====
 $det = db_select_all("
@@ -275,14 +278,18 @@ render_breadcrumb([
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Entrada #<?= (int)$E['id_entrada'] ?></h1>
-        <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/index.php') ?>">← Volver</a>
-        <form method="post" action="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/eliminar.php') ?>"
-            class="d-inline" onsubmit="return confirm('¿Eliminar por completo esta entrada?');">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
-            <input type="hidden" name="id" value="<?= (int)$id ?>">
-            <button class="btn btn-outline-danger btn-sm">Eliminar</button>
-        </form>
-
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/index.php') ?>">← Volver</a>
+            <a class="btn btn-outline-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/editar_cabecera.php?id=' . (int)$id) ?>">Editar cabecera</a>
+            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/imprimir.php?id=' . (int)$id) ?>">Imprimir</a>
+            <!-- tu formulario de Eliminar puede quedar aquí también -->
+            <form method="post" action="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/eliminar.php') ?>"
+                class="d-inline" onsubmit="return confirm('¿Eliminar por completo esta entrada?');">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
+                <input type="hidden" name="id" value="<?= (int)$id ?>">
+                <button class="btn btn-outline-danger btn-sm">Eliminar</button>
+            </form>
+        </div>
     </div>
 
     <?php if ($flash_ok): ?>
