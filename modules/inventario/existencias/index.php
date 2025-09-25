@@ -108,7 +108,29 @@ $mk = function ($p) use ($q, $agrupar, $solo_pos) {
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Existencias</h1>
-        <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/index.php') ?>">Entradas</a>
+        <div class="d-flex gap-2">
+            <?php
+            $qs = [];
+            if ($q !== '') $qs['q'] = $q;
+            if ($agrupar !== 'producto') $qs['agrupar'] = $agrupar;
+            if ($solo_pos) $qs['solo_pos'] = '1';
+            $qs_str = http_build_query($qs);
+            ?>
+            <a class="btn btn-outline-secondary btn-sm"
+                href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/index.php') ?>">Entradas</a>
+            <a class="btn btn-outline-primary btn-sm"
+                href="<?= htmlspecialchars($BASE . '/modules/inventario/existencias/export_xls.php' . ($qs_str ? ('?' . $qs_str) : '')) ?>">
+                Exportar Excel
+            </a>
+            <a class="btn btn-outline-success btn-sm"
+                href="<?= htmlspecialchars($BASE . '/modules/inventario/existencias/export_csv.php' . ($qs_str ? ('?' . $qs_str) : '')) ?>">
+                Exportar CSV
+            </a>
+            <a class="btn btn-primary btn-sm"
+                href="<?= htmlspecialchars($BASE . '/modules/inventario/existencias/imprimir.php' . ($qs_str ? ('?' . $qs_str) : '')) ?>">
+                PDF / Imprimir
+            </a>
+        </div>
     </div>
 
     <form class="row g-2 mb-3" method="get" action="index.php">
