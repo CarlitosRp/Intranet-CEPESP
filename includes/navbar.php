@@ -54,6 +54,8 @@ $URL_LOGOUT   = $BASE . '/modules/auth/logout.php';
                                 <h6 class="dropdown-header">Uniformes</h6>
                             </li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($URL_LISTADO) ?>">Gestionar catálogo</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/inventario/existencias/index.php') ?>">Existencias</a></li>
+
                             <!-- Páginas futuras -->
                             <li><a class="dropdown-item disabled" href="#">Usuarios (pronto)</a></li>
                             <li><a class="dropdown-item disabled" href="#">Roles (pronto)</a></li>

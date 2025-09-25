@@ -239,7 +239,8 @@ if (!empty($_GET['created'])) {
     $flash_ok = 'Entrada creada. Ahora agrega partidas.';
 }
 if (!empty($_GET['h_upd'])) {
-    $flash_ok = 'Cabecera actualizada.';}
+    $flash_ok = 'Cabecera actualizada.';
+}
 
 
 // ===== 4) Cargar partidas =====

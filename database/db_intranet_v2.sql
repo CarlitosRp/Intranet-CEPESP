@@ -156,6 +156,25 @@ CREATE TABLE IF NOT EXISTS print_logs (
   INDEX idx_pl_res (id_resguardo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- === VISTA: existencias por variante (solo con ENTRADAS) =====================
+DROP VIEW IF EXISTS v_existencias;
+CREATE VIEW v_existencias AS
+SELECT
+  v.id_variante,
+  e.id_equipo,
+  e.codigo,
+  e.descripcion,
+  e.modelo,
+  e.categoria,
+  e.maneja_talla,
+  v.talla,
+  SUM(d.cantidad) AS existencias
+FROM entradas_detalle d
+JOIN item_variantes v ON v.id_variante = d.id_variante
+JOIN equipo e         ON e.id_equipo   = v.id_equipo
+GROUP BY
+  v.id_variante, e.id_equipo, e.codigo, e.descripcion, e.modelo,
+  e.categoria, e.maneja_talla, v.talla;
 
 INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 -- Botas
