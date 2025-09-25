@@ -235,6 +235,9 @@ if (!empty($_GET['d_ok'])) {
 if (!empty($_GET['d_del'])) {
     $flash_ok = 'Partida eliminada.';
 }
+if (!empty($_GET['created'])) {
+    $flash_ok = 'Entrada creada. Ahora agrega partidas.';
+}
 
 // ===== 4) Cargar partidas =====
 $det = db_select_all("
@@ -247,6 +250,12 @@ $det = db_select_all("
   WHERE d.id_entrada = $id
   ORDER BY e.descripcion, v.talla
 ");
+
+$total_pzas = 0;
+foreach ($det as $d) {
+    $total_pzas += (int)$d['cantidad'];
+}
+
 if (isset($det['_error'])) {
     $det = [];
 }
@@ -267,6 +276,13 @@ render_breadcrumb([
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Entrada #<?= (int)$E['id_entrada'] ?></h1>
         <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/index.php') ?>">← Volver</a>
+        <form method="post" action="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/eliminar.php') ?>"
+            class="d-inline" onsubmit="return confirm('¿Eliminar por completo esta entrada?');">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
+            <input type="hidden" name="id" value="<?= (int)$id ?>">
+            <button class="btn btn-outline-danger btn-sm">Eliminar</button>
+        </form>
+
     </div>
 
     <?php if ($flash_ok): ?>
@@ -479,6 +495,12 @@ render_breadcrumb([
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+                    <?php if ($det): ?>
+                        <div class="mt-2 text-end">
+                            <span class="fw-semibold">Total de piezas:</span> <?= (int)$total_pzas ?>
+                        </div>
+                    <?php endif; ?>
+
                 </div>
             <?php endif; ?>
         </div>

@@ -72,9 +72,9 @@ if ($isPost) {
                 $id_entrada = mysqli_insert_id($cn);
                 mysqli_stmt_close($stmt);
 
-                // CSRF rotate + redirect a la pantalla de edición/detalle de líneas (la haremos luego)
+                // 👉 en vez de volver al listado, manda directo a Editar:
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
-                header('Location: ' . $BASE . '/modules/inventario/entradas/index.php?created=1');
+                header('Location: ' . $BASE . '/modules/inventario/entradas/editar.php?id=' . $id_entrada . '&created=1');
                 exit;
             } catch (mysqli_sql_exception $ex) {
                 if (isset($stmt)) {

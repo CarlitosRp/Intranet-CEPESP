@@ -14,6 +14,13 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
 }
 
+// Mensaje flash por acciones previas (debe ir arriba y no re-sobrescribirse)
+$flash_ok = '';
+if (isset($_GET['deleted']) && $_GET['deleted'] === '1') {
+    $flash_ok = 'Entrada eliminada correctamente.';
+}
+
+
 $BASE = rtrim(BASE_URL, '/');
 $cn   = db();
 
@@ -74,6 +81,13 @@ render_breadcrumb([
         <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/crear.php') ?>">Nueva entrada</a>
     </div>
 
+    <?php if ($flash_ok !== ''): ?>
+        <div class="alert alert-success alert-dismissible fade show auto-hide">
+            <?= htmlspecialchars($flash_ok) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>
+    <?php endif; ?>
+
     <form class="row g-2 mb-3" method="get" action="index.php">
         <div class="col-md-4">
             <input type="text" name="q" class="form-control" placeholder="Proveedor o factura" value="<?= htmlspecialchars($q) ?>">
@@ -114,12 +128,15 @@ render_breadcrumb([
                             <td><?= htmlspecialchars($r['creado_por']) ?></td>
                             <td class="text-nowrap">
                                 <!-- Próximo paso: ver/editar/eliminar -->
-                                <a class="btn btn-sm btn-outline-primary disabled" tabindex="-1">Ver</a>
+                                <a class="btn btn-sm btn-outline-primary"
+                                    href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/editar.php?id=' . (int)$r['id_entrada']) ?>">
+                                    Ver
+                                </a>
+
                                 <a class="btn btn-sm btn-outline-secondary"
                                     href="<?= htmlspecialchars($BASE . '/modules/inventario/entradas/editar.php?id=' . (int)$r['id_entrada']) ?>">
                                     Editar
                                 </a>
-
                             </td>
                         </tr>
                     <?php endforeach; ?>
