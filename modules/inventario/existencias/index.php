@@ -184,8 +184,8 @@ $mk = function ($p) use ($q, $agrupar, $solo_pos) {
                                 <td><?= htmlspecialchars($r['codigo']) ?></td>
                                 <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                 <td><?= htmlspecialchars($r['modelo']) ?></td>
-                                <td><?= htmlspecialchars($r['categoria']) ?></td>
-                                <td><?= htmlspecialchars($r['talla']) ?></td>
+                                <td><span class="chip"><?= htmlspecialchars($r['categoria']) ?></span></td>
+                                <td><span class="chip"><?= htmlspecialchars($r['talla']) ?></span></td>
                                 <td class="text-end"><?= (int)$r['existencias'] ?></td>
                             </tr>
                         <?php else: ?>

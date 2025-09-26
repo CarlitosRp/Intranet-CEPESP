@@ -156,7 +156,7 @@ render_breadcrumb([
                     <div><?= htmlspecialchars($e['descripcion']) ?></div>
                 </div>
                 <div class="col-sm-6"><strong>Categoría</strong>
-                    <div><?= htmlspecialchars($e['categoria']) ?></div>
+                    <div><span class="chip"><?= htmlspecialchars($e['categoria']) ?></span></div>
                 </div>
                 <div class="col-sm-6"><strong>Maneja talla</strong>
                     <div><?= ((int)$e['maneja_talla'] === 1 ? 'Sí' : 'No') ?></div>
