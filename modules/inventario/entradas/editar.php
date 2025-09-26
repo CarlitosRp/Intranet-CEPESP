@@ -194,7 +194,109 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // --- 3.3 Eliminar partida ---
+        // --- 3.3 Actualizar partida (cantidad y/o talla) ---
+        if ($accion === 'upd_det') {
+            $id_det     = (int)($_POST['id_detalle_entrada'] ?? 0);
+            $cantidad   = (int)($_POST['cantidad'] ?? 0);
+            $id_var_new = isset($_POST['id_variante']) ? (int)$_POST['id_variante'] : 0;
+
+            if ($id_det <= 0 || $cantidad <= 0) {
+                $flash_err = 'Partida/cantidad inválida.';
+            } else {
+                // Traer la partida con su producto para validar cambios
+                $row = db_select_all("
+      SELECT d.id_detalle_entrada, d.id_variante, v.id_equipo, e.maneja_talla
+      FROM entradas_detalle d
+      JOIN item_variantes v ON v.id_variante = d.id_variante
+      JOIN equipo e         ON e.id_equipo   = v.id_equipo
+      WHERE d.id_detalle_entrada = $id_det AND d.id_entrada = $id
+      LIMIT 1
+    ");
+                if (!$row || isset($row['_error'])) {
+                    $flash_err = 'No se encontró la partida.';
+                } else {
+                    $id_equipo = (int)$row[0]['id_equipo'];
+                    $maneja    = (int)$row[0]['maneja_talla'];
+
+                    if ($maneja === 1) {
+                        // Debe venir una variante válida del MISMO producto
+                        if ($id_var_new <= 0) {
+                            $flash_err = 'Selecciona una talla válida.';
+                        } else {
+                            $chk = db_select_all("
+            SELECT id_variante FROM item_variantes
+            WHERE id_variante = $id_var_new AND id_equipo = $id_equipo AND activo = 1
+            LIMIT 1
+          ");
+                            if (!$chk || isset($chk['_error'])) {
+                                $flash_err = 'La talla no corresponde al producto o está inactiva.';
+                            } else {
+                                $stmt = mysqli_prepare($cn, "
+              UPDATE entradas_detalle
+                 SET id_variante = ?, cantidad = ?
+               WHERE id_detalle_entrada = ? AND id_entrada = ?
+               LIMIT 1
+            ");
+                                mysqli_stmt_bind_param($stmt, 'iiii', $id_var_new, $cantidad, $id_det, $id);
+                                try {
+                                    $ok = mysqli_stmt_execute($stmt);
+                                    mysqli_stmt_close($stmt);
+                                    if ($ok) {
+                                        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                                        header('Location: editar.php?id=' . urlencode((string)$id) . '&d_upd=1');
+                                        exit;
+                                    } else {
+                                        $flash_err = 'No se pudo actualizar la partida.';
+                                    }
+                                } catch (mysqli_sql_exception $ex) {
+                                    if (isset($stmt)) {
+                                        mysqli_stmt_close($stmt);
+                                    }
+                                    $flash_err = 'Error al actualizar (código ' . (int)$ex->getCode() . ').';
+                                }
+                            }
+                        }
+                    } else {
+                        // Producto sin tallas: forzar variante ÚNICA y actualizar solo cantidad
+                        $var = db_select_all("
+          SELECT id_variante FROM item_variantes
+          WHERE id_equipo = $id_equipo AND talla = 'ÚNICA' AND activo = 1
+          LIMIT 1
+        ");
+                        if (!$var || isset($var['_error'])) {
+                            $flash_err = 'Variante ÚNICA no disponible.';
+                        } else {
+                            $id_var_unica = (int)$var[0]['id_variante'];
+                            $stmt = mysqli_prepare($cn, "
+            UPDATE entradas_detalle
+               SET id_variante = ?, cantidad = ?
+             WHERE id_detalle_entrada = ? AND id_entrada = ?
+             LIMIT 1
+          ");
+                            mysqli_stmt_bind_param($stmt, 'iiii', $id_var_unica, $cantidad, $id_det, $id);
+                            try {
+                                $ok = mysqli_stmt_execute($stmt);
+                                mysqli_stmt_close($stmt);
+                                if ($ok) {
+                                    $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+                                    header('Location: editar.php?id=' . urlencode((string)$id) . '&d_upd=1');
+                                    exit;
+                                } else {
+                                    $flash_err = 'No se pudo actualizar la partida.';
+                                }
+                            } catch (mysqli_sql_exception $ex) {
+                                if (isset($stmt)) {
+                                    mysqli_stmt_close($stmt);
+                                }
+                                $flash_err = 'Error al actualizar (código ' . (int)$ex->getCode() . ').';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 3.4 Eliminar partida ---
         if ($accion === 'del_det') {
             $id_det = (int)($_POST['id_detalle_entrada'] ?? 0);
             if ($id_det <= 0) {
@@ -241,7 +343,9 @@ if (!empty($_GET['created'])) {
 if (!empty($_GET['h_upd'])) {
     $flash_ok = 'Cabecera actualizada.';
 }
-
+if (!empty($_GET['d_upd'])) {
+    $flash_ok = 'Partida actualizada.';
+}
 
 // ===== 4) Cargar partidas =====
 $det = db_select_all("
@@ -491,6 +595,13 @@ render_breadcrumb([
                                     <td><?= htmlspecialchars($d['talla']) ?></td>
                                     <td><?= (int)$d['cantidad'] ?></td>
                                     <td class="text-nowrap">
+                                        <!-- Botón Editar (abre el collapse) -->
+                                        <?php $cid = 'edit_det_' . (int)$d['id_detalle_entrada']; ?>
+                                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $cid ?>">
+                                            Editar
+                                        </button>
+
+                                        <!-- Botón Eliminar (como ya lo tenías) -->
                                         <form method="post" action="editar.php?id=<?= (int)$id ?>"
                                             onsubmit="return confirm('¿Eliminar esta partida?');" class="d-inline">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
@@ -500,6 +611,60 @@ render_breadcrumb([
                                         </form>
                                     </td>
                                 </tr>
+
+                                <!-- Fila de edición (collapse) -->
+                                <tr class="collapse" id="<?= $cid ?>">
+                                    <td colspan="5">
+                                        <form method="post" action="editar.php?id=<?= (int)$id ?>" class="row g-2 align-items-end">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
+                                            <input type="hidden" name="accion" value="upd_det">
+                                            <input type="hidden" name="id_detalle_entrada" value="<?= (int)$d['id_detalle_entrada'] ?>">
+
+                                            <?php if ((int)$d['maneja_talla'] === 1): ?>
+                                                <?php
+                                                // Cargar tallas del producto de esta fila
+                                                $id_eq_row = (int)$d['id_equipo'];
+                                                $tallas_row = db_select_all("
+            SELECT id_variante, talla, activo
+            FROM item_variantes
+            WHERE id_equipo = $id_eq_row
+            ORDER BY talla
+          ");
+                                                if (isset($tallas_row['_error'])) $tallas_row = [];
+                                                ?>
+                                                <div class="col-sm-4">
+                                                    <label class="form-label">Talla</label>
+                                                    <select name="id_variante" class="form-select" required>
+                                                        <?php foreach ($tallas_row as $t): ?>
+                                                            <option value="<?= (int)$t['id_variante'] ?>"
+                                                                <?= ((int)$t['id_variante'] === (int)$d['id_variante'] ? 'selected' : '') ?>
+                                                                <?= ((int)$t['activo'] === 1 ? '' : 'disabled') ?>>
+                                                                <?= htmlspecialchars($t['talla']) ?><?= ((int)$t['activo'] === 1 ? '' : ' (inactiva)') ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="col-sm-4">
+                                                    <label class="form-label">Talla</label>
+                                                    <input type="text" class="form-control" value="ÚNICA" disabled>
+                                                    <!-- Para productos sin talla NO mandamos id_variante (el backend forzará ÚNICA) -->
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <div class="col-sm-3">
+                                                <label class="form-label">Cantidad</label>
+                                                <input type="number" name="cantidad" class="form-control" min="1" step="1"
+                                                    value="<?= (int)$d['cantidad'] ?>" required>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <button class="btn btn-primary">Guardar</button>
+                                                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $cid ?>">Cancelar</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+
                             <?php endforeach; ?>
                         </tbody>
                     </table>
