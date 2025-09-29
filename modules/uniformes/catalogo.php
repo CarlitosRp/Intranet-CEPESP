@@ -182,8 +182,9 @@ render_breadcrumb([['label' => 'Catálogo']]);
                     </li>
                 <?php endfor; ?>
                 <li class="page-item <?= ($page >= $totalPages ? 'disabled' : '') ?>">
-                    <a class="page-link" href="<?= ($page >>= $totalPages ? '#' : htmlspecialchars($mk($page + 1))) ?>">Siguiente »</a>
+                    <a class="page-link" href="<?= ($page >= $totalPages ? '#' : htmlspecialchars($mk($page + 1))) ?>">Siguiente »</a>
                 </li>
+
             </ul>
         </nav>
         <p class="text-muted small">Mostrando <?= count($rows) ?> de <?= $totalRows ?> productos.</p>
