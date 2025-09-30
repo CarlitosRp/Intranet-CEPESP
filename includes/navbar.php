@@ -73,6 +73,19 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
+                            <li>
+                                <h6 class="dropdown-header">Salidas</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">Listado</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/crear.php') ?>">Nueva salida</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/index.php') ?>">Resguardos</a></li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($URL_EXISTENCIAS) ?>">Existencias</a></li>
 
                             <!-- Futuro -->

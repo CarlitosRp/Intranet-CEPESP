@@ -99,38 +99,43 @@ CREATE TABLE IF NOT EXISTS entradas_detalle (
   INDEX idx_ed_var (id_variante)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4) RESGUARDOS (cabecera + detalle) -----------
-CREATE TABLE IF NOT EXISTS resguardos (
-  id_resguardo   INT AUTO_INCREMENT PRIMARY KEY,
-  `año`          INT         NOT NULL,
-  folio          INT         NOT NULL,
-  resguardo_uid  VARCHAR(32) NOT NULL UNIQUE,   -- p.ej. '2025-000123'
-  fecha_emision  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  id_empleado    INT         NOT NULL,
-  origen_recurso VARCHAR(60) DEFAULT NULL,      -- ej. 'FASP 2025'
-  estado         ENUM('borrador','emitido','cancelado') NOT NULL DEFAULT 'emitido',
-  observaciones  VARCHAR(255) DEFAULT NULL,
-  creado_por     VARCHAR(60)  DEFAULT NULL,
-  reimpresiones  INT          NOT NULL DEFAULT 0,
-  CONSTRAINT fk_res_emp FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
+-- =============== SALIDAS (cabecera + detalle) ===================
+CREATE TABLE IF NOT EXISTS salidas (
+  id_salida     INT AUTO_INCREMENT PRIMARY KEY,
+  fecha         DATE         NOT NULL,
+  id_empleado   INT          NOT NULL,              -- a quién se entrega
+  observaciones VARCHAR(255) DEFAULT NULL,
+  creado_por    VARCHAR(60)  DEFAULT NULL,
+  CONSTRAINT fk_sal_emp FOREIGN KEY (id_empleado) REFERENCES empleados(id_empleado)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX idx_res_año_folio (`año`, folio),
-  INDEX idx_res_empleado (id_empleado),
-  INDEX idx_res_fecha (fecha_emision)
+  INDEX idx_sal_fecha (fecha),
+  INDEX idx_sal_emp (id_empleado)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS resguardos_detalle (
-  id_detalle_resguardo INT AUTO_INCREMENT PRIMARY KEY,
-  id_resguardo         INT NOT NULL,
-  id_variante          INT NOT NULL,
-  cantidad             INT NOT NULL CHECK (cantidad > 0),
-  observaciones        VARCHAR(255) DEFAULT NULL,
-  CONSTRAINT fk_rd_res FOREIGN KEY (id_resguardo) REFERENCES resguardos(id_resguardo)
+CREATE TABLE IF NOT EXISTS salidas_detalle (
+  id_detalle_salida INT AUTO_INCREMENT PRIMARY KEY,
+  id_salida         INT NOT NULL,
+  id_variante       INT NOT NULL,
+  cantidad          INT NOT NULL CHECK (cantidad > 0),
+  CONSTRAINT fk_sd_sal FOREIGN KEY (id_salida)   REFERENCES salidas(id_salida)
     ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT fk_rd_var FOREIGN KEY (id_variante)  REFERENCES item_variantes(id_variante)
+  CONSTRAINT fk_sd_var FOREIGN KEY (id_variante) REFERENCES item_variantes(id_variante)
     ON UPDATE CASCADE ON DELETE RESTRICT,
-  INDEX idx_rd_res (id_resguardo),
-  INDEX idx_rd_var (id_variante)
+  INDEX idx_sd_var (id_variante)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============== RESGUARDOS (1:1 con salida que genera PDF) =====
+CREATE TABLE IF NOT EXISTS resguardos (
+  id_resguardo  INT AUTO_INCREMENT PRIMARY KEY,
+  id_salida     INT NOT NULL,
+  folio         VARCHAR(30) NOT NULL,     -- visible en el impreso
+  anio          INT         NOT NULL,     -- para reinicio anual de folios
+  lugar         VARCHAR(80) DEFAULT 'Hermosillo, Sonora',
+  director      VARCHAR(120) DEFAULT NULL, -- nombre quien entrega
+  creado_en     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_res_folio_anio (folio, anio),
+  CONSTRAINT fk_res_sal FOREIGN KEY (id_salida) REFERENCES salidas(id_salida)
+    ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 5) FOLIOS (reinicio anual) + LOG DE REIMPRESIONES
@@ -176,6 +181,32 @@ GROUP BY
   v.id_variante, e.id_equipo, e.codigo, e.descripcion, e.modelo,
   e.categoria, e.maneja_talla, v.talla;
 
+  -- =============== VISTA: existencias netas (entradas - salidas) ==
+DROP VIEW IF EXISTS v_existencias_netas;
+CREATE VIEW v_existencias_netas AS
+SELECT
+  v.id_variante,
+  e.id_equipo,
+  e.codigo,
+  e.descripcion,
+  e.modelo,
+  e.categoria,
+  e.maneja_talla,
+  v.talla,
+  COALESCE(ent.cant, 0) - COALESCE(sal.cant, 0) AS existencias
+FROM item_variantes v
+JOIN equipo e ON e.id_equipo = v.id_equipo
+LEFT JOIN (
+  SELECT d.id_variante, SUM(d.cantidad) AS cant
+  FROM entradas_detalle d
+  GROUP BY d.id_variante
+) ent ON ent.id_variante = v.id_variante
+LEFT JOIN (
+  SELECT d.id_variante, SUM(d.cantidad) AS cant
+  FROM salidas_detalle d
+  GROUP BY d.id_variante
+) sal ON sal.id_variante = v.id_variante;
+
 INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 -- Botas
 ('BOTA-12401', 'Bota táctica color negro marca 5.11', '12401', 'Calzado', 1),
@@ -211,7 +242,6 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 ('RODILLERA-001', 'Par de rodilleras tácticas (FX Tactical)', NULL, 'Protección', 1),
 ('GOOGLE-001', 'Google táctico (FX Tactical)', NULL, 'Protección', 1),
 ('GUANTE-001', 'Guantes tácticos (PMT)', NULL, 'Protección', 1);
-
 
 /* =========================================
    VARIANTES (tallas) por artículo (item_variantes)
