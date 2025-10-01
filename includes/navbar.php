@@ -101,6 +101,7 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/index.php') ?>">Resguardos</a></li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/por_empleado.php') ?>">Resguardos por empleado</a></li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/reporte_global.php') ?>">Reporte global</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/reporte_categoria.php') ?>">Reporte por categoría</a></li>
                         </ul>
                     </li>
                     <!-- Administración (placeholder futuro) -->
