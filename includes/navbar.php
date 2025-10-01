@@ -81,21 +81,27 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/index.php') ?>">Resguardos</a></li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($URL_EXISTENCIAS) ?>">Existencias</a></li>
-
-                            <!-- Futuro -->
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item disabled" href="#">Salidas (pronto)</a></li>
                         </ul>
                     </li>
-
+                    <!-- Resguardos -->
+                    <li class="nav-item dropdown">
+                        <?php
+                        // Activo si cae en cualquiera de las rutas de inventario
+                        $isInvActive = nav_active('/inventario/entradas/')
+                            || nav_active('/inventario/existencias/');
+                        ?>
+                        <a class="nav-link dropdown-toggle <?= $isInvActive ? 'active' : '' ?>" href="#" data-bs-toggle="dropdown">
+                            Resguardos
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Resguardos</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/index.php') ?>">Resguardos</a></li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/por_empleado.php') ?>">Resguardos por empleado</a></li>
+                        </ul>
+                    </li>
                     <!-- Administración (placeholder futuro) -->
                     <li class="nav-item dropdown">
                         <?php $isAdminActive = nav_active('/users') || nav_active('/roles'); ?>
