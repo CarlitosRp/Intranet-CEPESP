@@ -19,11 +19,7 @@ $empleados = db_select_all("
   SELECT
     id_empleado,
     no_empleado,
-    CONCAT(TRIM(COALESCE(nombre, '')),
-           ' ',
-           TRIM(COALESCE(aPaterno, '')),
-           CASE WHEN COALESCE(aMaterno,'')<>'' THEN CONCAT(' ', TRIM(aMaterno)) ELSE '' END
-    ) AS nombre_completo
+    nombre_completo          
   FROM empleados
   WHERE estatus = 1
   ORDER BY nombre_completo ASC
@@ -53,11 +49,7 @@ if ($id_empleado > 0) {
     SELECT
       id_empleado,
       no_empleado,
-      CONCAT(TRIM(COALESCE(nombre, '')),
-             ' ',
-             TRIM(COALESCE(aPaterno, '')),
-             CASE WHEN COALESCE(aMaterno,'')<>'' THEN CONCAT(' ', TRIM(aMaterno)) ELSE '' END
-      ) AS nombre_completo,
+      nombre_completo,
       puesto
     FROM empleados
     WHERE id_empleado = $id_empleado

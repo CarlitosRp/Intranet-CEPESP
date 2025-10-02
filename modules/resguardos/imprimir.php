@@ -19,9 +19,7 @@ $H = db_select_all("
   SELECT r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
          s.id_salida, s.fecha, s.id_empleado, s.observaciones,
          e.no_empleado,
-         CONCAT(TRIM(COALESCE(e.nombre,'')),' ',TRIM(COALESCE(e.aPaterno,'')),
-          CASE WHEN COALESCE(e.aMaterno,'')<>'' THEN CONCAT(' ',TRIM(e.aMaterno)) ELSE '' END
-         ) AS empleado_nombre,
+         TRIM(e.nombre_completo),
          e.puesto
   FROM resguardos r
   JOIN salidas s   ON s.id_salida = r.id_salida
@@ -104,7 +102,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <div class="row mt-3">
                 <div class="col-md-8">
-                    <div><strong>Empleado:</strong> <?= htmlspecialchars($R['empleado_nombre']) ?></div>
+                    <div><strong>Empleado:</strong> <?= htmlspecialchars($R['nombre_completo']) ?></div>
                     <?php if (!empty($R['no_empleado'])): ?>
                         <div><strong>No. Empleado:</strong> <?= htmlspecialchars($R['no_empleado']) ?></div>
                     <?php endif; ?>
@@ -151,7 +149,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <div class="row mt-5">
                 <div class="col-md-6 text-center">
-                    <div class="sign-line">RECIBIÓ: <?= htmlspecialchars($R['empleado_nombre']) ?></div>
+                    <div class="sign-line">RECIBIÓ: <?= htmlspecialchars($R['nombre_completo']) ?></div>
                 </div>
                 <div class="col-md-6 text-center">
                     <div class="sign-line">ENTREGÓ: <?= htmlspecialchars($R['director'] ?? 'Director Administrativo') ?></div>

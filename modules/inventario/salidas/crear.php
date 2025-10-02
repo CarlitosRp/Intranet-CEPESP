@@ -17,20 +17,14 @@ $BASE = rtrim(BASE_URL, '/');
 $cn   = db();
 
 $page_title = 'Inventario · Nueva salida';
-
 /* 1) Empleados activos
-   - Construimos nombre_completo con CONCAT(nombre, aPaterno, aMaterno)
-   - Si aMaterno viene NULL/'' no estorba; CONCAT con cadenas vacías funciona
+   
 */
 $empleados = db_select_all("
   SELECT
     id_empleado,
     no_empleado,
-    CONCAT(TRIM(COALESCE(nombre, '')),
-           ' ',
-           TRIM(COALESCE(aPaterno, '')),
-           CASE WHEN COALESCE(aMaterno,'') <> '' THEN CONCAT(' ', TRIM(aMaterno)) ELSE '' END
-    ) AS nombre_completo
+    nombre_completo
   FROM empleados
   WHERE estatus = 1
   ORDER BY nombre_completo ASC

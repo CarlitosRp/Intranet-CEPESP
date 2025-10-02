@@ -43,9 +43,8 @@ if ($emp !== '') {
     $empEsc = mysqli_real_escape_string($cn, $emp);
     $where .= " AND (
     e.no_empleado LIKE '%$empEsc%' OR
-    e.nombre LIKE '%$empEsc%' OR
-    e.aPaterno LIKE '%$empEsc%' OR
-    e.aMaterno LIKE '%$empEsc%'
+    e.nombre_completo LIKE '%$empEsc%' OR
+   
   )";
 }
 
@@ -82,9 +81,7 @@ $sql = "
   SELECT
     s.id_salida, s.fecha, s.observaciones,
     e.id_empleado, e.no_empleado,
-    CONCAT(TRIM(COALESCE(e.nombre,'')),' ',TRIM(COALESCE(e.aPaterno,'')),
-      CASE WHEN COALESCE(e.aMaterno,'')<>'' THEN CONCAT(' ',TRIM(e.aMaterno)) ELSE '' END
-    ) AS empleado_nombre,
+    TRIM(e.nombre_completo),
     COALESCE(t.total_pzas,0) AS total_pzas,
     r.id_resguardo, r.folio, r.anio
   FROM salidas s
@@ -177,7 +174,7 @@ $mk = function ($p) use ($desde, $hasta, $emp, $rgdo) {
                                 <tr>
                                     <td><?= htmlspecialchars($r['fecha']) ?></td>
                                     <td>
-                                        <div class="fw-semibold"><?= htmlspecialchars($r['empleado_nombre']) ?></div>
+                                        <div class="fw-semibold"><?= htmlspecialchars($r['nombre_completo']) ?></div>
                                         <?php if (!empty($r['no_empleado'])): ?>
                                             <div class="text-muted small">No. <?= htmlspecialchars($r['no_empleado']) ?></div>
                                         <?php endif; ?>

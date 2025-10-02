@@ -26,9 +26,7 @@ if ($id <= 0) {
 $head = db_select_all("
   SELECT s.id_salida, s.fecha, s.id_empleado, s.observaciones, s.creado_por,
          e.no_empleado,
-         CONCAT(TRIM(COALESCE(e.nombre,'')), ' ', TRIM(COALESCE(e.aPaterno,'')),
-                CASE WHEN COALESCE(e.aMaterno,'')<>'' THEN CONCAT(' ', TRIM(e.aMaterno)) ELSE '' END
-         ) AS empleado_nombre
+         e.nombre_completo
   FROM salidas s
   JOIN empleados e ON e.id_empleado = s.id_empleado
   WHERE s.id_salida = $id
@@ -329,7 +327,7 @@ render_breadcrumb([
                 <div class="col-sm-5">
                     <div class="text-muted">Empleado</div>
                     <div class="fw-semibold">
-                        <?= htmlspecialchars($S['empleado_nombre']) ?>
+                        <?= htmlspecialchars($S['nombre_completo']) ?>
                         <?php if (!empty($S['no_empleado'])): ?>
                             <span class="text-muted small">(<?= htmlspecialchars($S['no_empleado']) ?>)</span>
                         <?php endif; ?>

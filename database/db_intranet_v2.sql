@@ -36,13 +36,14 @@ CREATE TABLE IF NOT EXISTS empleados (
   id_empleado   INT AUTO_INCREMENT PRIMARY KEY,
   no_empleado   VARCHAR(20)  NOT NULL UNIQUE,
   curp          VARCHAR(18)  NOT NULL UNIQUE,
-  nombre        VARCHAR(80)  NOT NULL,
-  aPaterno      VARCHAR(60)  NOT NULL,
-  aMaterno      VARCHAR(60)  DEFAULT NULL,
+  nombre_completo VARCHAR(120) NOT NULL,
   base          VARCHAR(80)  DEFAULT NULL,   -- antes 'departamento'
   puesto        VARCHAR(80)  DEFAULT NULL,
   estatus       TINYINT(1)   NOT NULL DEFAULT 1, -- 1=activo,0=baja
-  fecha_alta    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  sexo          ENUM('MASCULINO','FEMENINO') DEFAULT NULL,
+  rfc           VARCHAR(13)  DEFAULT NULL,
+  cuip          VARCHAR(20)  DEFAULT NULL,
+  fecha_alta    DATE         DEFAULT NULL,
   fecha_baja    DATE         DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -38,9 +38,7 @@ if ($emp !== '') {
     $eEsc = mysqli_real_escape_string($cn, $emp);
     $where .= " AND (
       e.no_empleado LIKE '%$eEsc%' OR
-      e.nombre      LIKE '%$eEsc%' OR
-      e.aPaterno    LIKE '%$eEsc%' OR
-      e.aMaterno    LIKE '%$eEsc%'
+      e.nombre_completo      LIKE '%$eEsc%'
   )";
 }
 
@@ -77,9 +75,7 @@ $sql = "
     r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
     s.id_salida, s.fecha, s.observaciones,
     e.id_empleado, e.no_empleado,
-    CONCAT(TRIM(COALESCE(e.nombre,'')),' ',TRIM(COALESCE(e.aPaterno,'')),
-      CASE WHEN COALESCE(e.aMaterno,'')<>'' THEN CONCAT(' ',TRIM(e.aMaterno)) ELSE '' END
-    ) AS empleado_nombre,
+    TRIM(e.nombre_completo),
     COALESCE(t.total_pzas,0) AS total_pzas
   FROM resguardos r
   JOIN salidas s   ON s.id_salida = r.id_salida
@@ -175,7 +171,7 @@ $mk = function ($p) use ($folio, $emp, $desde, $hasta, $anio) {
                                         <span class="chip">No. <?= htmlspecialchars(str_pad($r['folio'], 5, '0', STR_PAD_LEFT)) ?>/<?= (int)$r['anio'] ?></span>
                                     </td>
                                     <td>
-                                        <div class="fw-semibold"><?= htmlspecialchars($r['empleado_nombre']) ?></div>
+                                        <div class="fw-semibold"><?= htmlspecialchars($r['nombre_completo']) ?></div>
                                         <?php if (!empty($r['no_empleado'])): ?>
                                             <div class="text-muted small">No. <?= htmlspecialchars($r['no_empleado']) ?></div>
                                         <?php endif; ?>
