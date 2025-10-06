@@ -81,7 +81,7 @@ $sql = "
   SELECT
     s.id_salida, s.fecha, s.observaciones,
     e.id_empleado, e.no_empleado,
-    TRIM(e.nombre_completo),
+    e.nombre_completo,
     COALESCE(t.total_pzas,0) AS total_pzas,
     r.id_resguardo, r.folio, r.anio
   FROM salidas s

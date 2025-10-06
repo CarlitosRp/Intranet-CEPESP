@@ -75,7 +75,7 @@ $sql = "
     r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
     s.id_salida, s.fecha, s.observaciones,
     e.id_empleado, e.no_empleado,
-    TRIM(e.nombre_completo),
+    e.nombre_completo,
     COALESCE(t.total_pzas,0) AS total_pzas
   FROM resguardos r
   JOIN salidas s   ON s.id_salida = r.id_salida

@@ -19,7 +19,7 @@ $H = db_select_all("
   SELECT r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
          s.id_salida, s.fecha, s.id_empleado, s.observaciones,
          e.no_empleado,
-         TRIM(e.nombre_completo),
+         e.nombre_completo,
          e.puesto
   FROM resguardos r
   JOIN salidas s   ON s.id_salida = r.id_salida
