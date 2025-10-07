@@ -320,6 +320,7 @@ render_breadcrumb([
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
             <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar_cabecera.php?id=' . (int)$S['id_salida']) ?>">Editar cabecera</a>
+            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/crear.php') ?>">Nueva salida</a>
         </div>
     </div>
 
