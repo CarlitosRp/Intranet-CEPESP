@@ -1,22 +1,358 @@
+:root {
+  --fg: #111;
+  --muted: #555;
+  --line: #ccc;
+  --brand: #0d6efd;
+  --pad: 16px;
+  --footer-h: 28mm;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 15mm 15mm 10mm;
+} /* margen inferior menor */
+
+html,
 body {
-  background: #f6f7f9;
+  margin: 0;
+  padding: 0;
 }
 
-.badge-inactivo {
-  background: #6c757d;
+* {
+  box-sizing: border-box;
 }
 
-.card {
-  border-radius: 12px;
+.sheet {
+  width: 210mm;
+  min-height: 297mm; /* alto página */
+  margin: 0 auto;
+  padding: 0mm 18mm;
+  background: #fff;
+  display: flex;
+  flex-direction: column; /* IMPORTANTE */
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+header .logo {
+  width: 20%;
+  height: 20%;
+}
+
+header .hgroup {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  text-align: right;
+}
+
+header .hgroup h1 {
+  margin: 0 0 4px;
+  font-size: 30px;
+  letter-spacing: 0.1px;
+}
+
+header .hgroup .sub {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 3px;
+  color: #555;
+  text-align: center;
+}
+
+header .hgroup .folio {
+  text-align: right;
+  min-width: 80px;
+}
+
+header .folio .lbl {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+header .folio .val {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border: 2px solid var(--fg);
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* El contenido ocupa el espacio restante */
+.contenido {
+  flex: 1; /* empuja el footer hacia abajo */
+  display: block;
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.meta .item {
+  display: flex;
+  gap: 8px;
+}
+
+.meta .k {
+  width: 140px;
+  color: var(--muted);
+}
+
+.meta .v {
+  flex: 1;
+  font-weight: 600;
+}
+
+/* ==== Texto introductorio arriba de la tabla ==== */
+.texto-intro {
+  margin: 6mm 0 4mm;
+  text-align: justify; /* texto justificado */
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #222;
+}
+
+.texto-intro p {
+  margin: 0 0 3mm;
+}
+
+.texto-intro strong {
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+thead th {
+  text-align: left;
+  background: #f4f5f7;
+  border: 1px solid var(--line);
+  padding: 8px 6px;
+  font-size: 12px;
+}
+
+tbody td {
+  border: 1px solid var(--line);
+  padding: 7px 6px;
+  vertical-align: top;
+}
+
+tfoot td {
+  border: 1px solid var(--line);
+  padding: 8px 6px;
+  font-weight: 700;
+}
+
+.num {
+  text-align: right;
 }
 
 .chip {
   display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  background: #e7f1ff;
-  color: #0a58ca;
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.signs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 26mm;
+}
+
+.sign {
+  text-align: center;
+}
+
+.sign .line {
+  border-top: 1px solid #000;
+  margin-top: 28px;
+  padding-top: 4px;
+}
+
+.note {
+  margin-top: 12px;
+  font-size: 11px;
+  color: #333;
+  background: #fafafa;
+  border: 1px solid #eee;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+}
+
+.toolbar .btn-print {
+  padding: 8px 12px;
+  border: 1px solid var(--brand);
+  color: #fff;
+  background: var(--brand);
+  border-radius: 6px;
+  cursor: pointer;
   font-weight: 600;
-  margin: 0.125rem 0.25rem 0.125rem 0;
-  font-size: 0.85rem;
+}
+
+.toolbar .btn-back {
+  margin-left: 8px;
+  padding: 8px 12px;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logo2 {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  border: 0;
+}
+
+/* Pie visual en pantalla (fluye normal) */
+footer.pie-institucional {
+  border-top: 1px solid #ccc;
+  padding-top: 5mm;
+  font: 11px/1.4 system-ui, Arial, sans-serif;
+  color: #333;
+}
+
+footer.pie-institucional .pie-contenido {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10mm;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+footer.pie-institucional .logo2 {
+  width: 30%;
+  height: auto;
+  flex-shrink: 0;
+}
+
+footer.pie-institucional .info {
+  max-width: 400px;
+  margin-bottom: 15mm;
+}
+
+/* Espaciador (sólo útil al imprimir) */
+.footer-spacer {
+  height: 0;
+}
+
+footer.pie-institucional a {
+  color: inherit;
+  text-decoration: none;
+}
+
+footer.pie-institucional a:hover {
+  text-decoration: underline;
+}
+
+@media print {
+  .toolbar {
+    display: none !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sheet {
+    position: relative;
+  }
+
+  /* --- FIRMAS FIJAS SOBRE EL PIE --- */
+  .signs {
+    position: fixed;
+    left: 15mm;
+    right: 15mm;
+    bottom: 38mm; /* queda justo encima del pie */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+
+  /* Ajuste visual de las líneas de firma */
+  .sign .line {
+    border-top: 1px solid #000;
+    margin-top: 20px;
+    padding-top: 4px;
+  }
+
+  /* --- PIE PEGADO AL BORDE INFERIOR --- */
+  footer.pie-institucional {
+    position: fixed;
+    left: 15mm;
+    right: 15mm;
+    bottom: 6mm; /* antes 16mm → más pegado */
+    background: #fff;
+    border-top: 1px solid #bbb;
+    padding-top: 3mm;
+    font: 10px/1.3 Arial, sans-serif;
+    color: #333;
+    page-break-inside: avoid;
+  }
+
+  footer.pie-institucional .pie-contenido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8mm;
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  footer.pie-institucional .logo2 {
+    width: 25%;
+    height: auto;
+    flex-shrink: 0;
+  }
+
+  footer.pie-institucional .info {
+    max-width: 360px;
+    margin: 0;
+  }
+
+  /* --- ELIMINA CABECERAS Y PIE DE NAVEGADOR --- */
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 8mm; /* margen inferior mínimo */
+  }
+
+  /* Evita saltos innecesarios */
+  .note,
+  table,
+  .table-wrap {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
 }

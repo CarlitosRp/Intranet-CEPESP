@@ -318,9 +318,24 @@ render_breadcrumb([
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Salida No. <?= htmlspecialchars(str_pad((string)$S['id_salida'], 5, '0', STR_PAD_LEFT)) ?></h1>
         <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
-            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar_cabecera.php?id=' . (int)$S['id_salida']) ?>">Editar cabecera</a>
-            <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/crear.php') ?>">Nueva salida</a>
+            <?php require_once __DIR__ . '/../../../includes/csrf.php'; ?>
+            ...
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
+                <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar_cabecera.php?id=' . (int)$S['id_salida']) ?>">Editar cabecera</a>
+
+                <form method="post"
+                    action="<?= htmlspecialchars($BASE . '/modules/resguardos/crear.php') ?>"
+                    class="d-inline">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="id_salida" value="<?= (int)$S['id_salida'] ?>">
+                    <button class="btn btn-success btn-sm"
+                        onclick="return confirm('Se generará un nuevo resguardo para esta salida. ¿Continuar?')">
+                        Generar resguardo
+                    </button>
+                </form>
+                <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/crear.php') ?>">Nueva salida</a>
+            </div>
         </div>
     </div>
 

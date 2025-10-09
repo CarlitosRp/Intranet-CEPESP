@@ -127,25 +127,17 @@ CREATE TABLE IF NOT EXISTS salidas_detalle (
 
 -- =============== RESGUARDOS (1:1 con salida que genera PDF) =====
 CREATE TABLE IF NOT EXISTS resguardos (
-  id_resguardo INT AUTO_INCREMENT PRIMARY KEY,
-  id_salida    INT NOT NULL,
-
-  anio   INT NOT NULL,
-  folio  INT NOT NULL,
-  fecha  DATE NOT NULL,
-  lugar    VARCHAR(80)  DEFAULT NULL,
-  director VARCHAR(120) DEFAULT NULL,
-  creado_por VARCHAR(60) DEFAULT NULL,
-
-  UNIQUE KEY uq_resguardo_anio_folio (anio, folio),
-  KEY idx_resg_id_salida (id_salida),
-
-  CONSTRAINT fk_resguardos_salida
-    FOREIGN KEY (id_salida)
-    REFERENCES salidas (id_salida)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  id_resguardo  INT AUTO_INCREMENT PRIMARY KEY,
+  id_salida     INT NOT NULL,
+  folio         VARCHAR(30) NOT NULL,     -- visible en el impreso
+  anio          INT         NOT NULL,     -- para reinicio anual de folios
+  lugar         VARCHAR(80) DEFAULT 'Hermosillo, Sonora',
+  director      VARCHAR(120) DEFAULT NULL, -- nombre quien entrega
+  creado_en     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_res_folio_anio (folio, anio),
+  CONSTRAINT fk_res_sal FOREIGN KEY (id_salida) REFERENCES salidas(id_salida)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 5) FOLIOS (reinicio anual) + LOG DE REIMPRESIONES
 CREATE TABLE IF NOT EXISTS folio_series (

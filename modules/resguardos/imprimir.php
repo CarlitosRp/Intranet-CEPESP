@@ -5,158 +5,262 @@ require_once __DIR__ . '/../../includes/db.php';
 require_once __DIR__ . '/../../includes/auth.php';
 
 auth_require_login();
+$cn = db();
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 $BASE = rtrim(BASE_URL, '/');
-$cn   = db();
 
-$id = (int)($_GET['id'] ?? 0);
-if ($id <= 0) {
+$id_resguardo = (int)($_GET['id_resguardo'] ?? 0);
+$id_salida    = (int)($_GET['id_salida'] ?? 0);
+
+if ($id_resguardo <= 0 && $id_salida <= 0) {
     http_response_code(400);
-    exit('ID inválido');
+    exit('Falta id_resguardo o id_salida.');
 }
 
-// Cabecera: resguardo + salida + empleado
-$H = db_select_all("
-  SELECT r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
-         s.id_salida, s.fecha, s.id_empleado, s.observaciones,
-         e.no_empleado,
-         e.nombre_completo,
-         e.puesto
-  FROM resguardos r
-  JOIN salidas s   ON s.id_salida = r.id_salida
-  JOIN empleados e ON e.id_empleado = s.id_empleado
-  WHERE r.id_resguardo = $id
-  LIMIT 1
-");
-if (!$H || isset($H['_error'])) {
-    http_response_code(404);
-    exit('Resguardo no encontrado');
-}
-$R = $H[0];
+// ---------- Carga cabecera ----------
+$R = null;  // datos del resguardo (si aplica)
+$S = null;  // datos de la salida
 
-// Detalle de la salida
-$D = db_select_all("
-  SELECT d.cantidad, v.talla, e.descripcion, e.codigo, e.modelo, e.categoria
+if ($id_resguardo > 0) {
+    // Con resguardo: traemos todo linkeado a la salida
+    $q = db_select_all("
+    SELECT
+      r.id_resguardo, r.folio, r.fecha AS fecha_resguardo, r.director, r.lugar, r.creado_por AS resg_creado_por,
+      s.id_salida, s.fecha AS fecha_salida, s.observaciones, s.creado_por AS salida_creado_por,
+      e.id_empleado, e.no_empleado, e.nombre_completo AS empleado_nombre, e.puesto
+    FROM resguardos r
+    JOIN salidas s   ON s.id_salida = r.id_salida
+    JOIN empleados e ON e.id_empleado = s.id_empleado
+    WHERE r.id_resguardo = $id_resguardo
+    LIMIT 1
+  ");
+    if (!$q || isset($q['_error']) || !$q) {
+        http_response_code(404);
+        exit('Resguardo no encontrado.');
+    }
+    $R = $q[0];
+
+    // Normalizamos estructura $S para reusar detalle
+    $S = [
+        'id_salida'       => (int)$R['id_salida'],
+        'fecha'           => $R['fecha_salida'],
+        'observaciones'   => $R['observaciones'],
+        'creado_por'      => $R['salida_creado_por'],
+        'id_empleado'     => (int)$R['id_empleado'],
+        'no_empleado'     => $R['no_empleado'],
+        'empleado_nombre' => $R['empleado_nombre'],
+        'puesto'          => $R['puesto'],
+    ];
+} else {
+    // Sin resguardo: imprimimos “tipo resguardo” con datos de la salida
+    $q = db_select_all("
+    SELECT
+      s.id_salida, s.fecha, s.observaciones, s.creado_por,
+      e.id_empleado, e.no_empleado, e.nombre_completo AS empleado_nombre, e.puesto
+    FROM salidas s
+    JOIN empleados e ON e.id_empleado = s.id_empleado
+    WHERE s.id_salida = $id_salida
+    LIMIT 1
+  ");
+    if (!$q || isset($q['_error']) || !$q) {
+        http_response_code(404);
+        exit('Salida no encontrada.');
+    }
+    $S = $q[0];
+}
+
+// ---------- Carga detalle ----------
+$id_salida_det = (int)$S['id_salida'];
+$DET = db_select_all("
+  SELECT
+    d.id_detalle_salida,
+    d.cantidad,
+    v.talla,
+    e.codigo,
+    e.descripcion,
+    e.modelo
   FROM salidas_detalle d
   JOIN item_variantes v ON v.id_variante = d.id_variante
   JOIN equipo e         ON e.id_equipo   = v.id_equipo
-  WHERE d.id_salida = {$R['id_salida']}
-  ORDER BY e.descripcion, v.talla
+  WHERE d.id_salida = $id_salida_det
+  ORDER BY e.descripcion ASC, v.talla ASC
 ");
-if (isset($D['_error'])) $D = [];
+if (isset($DET['_error'])) $DET = [];
 
-$page_title = 'Resguardo · Imprimir';
-require_once __DIR__ . '/../../includes/header.php';
+// ---------- Valores de cabecera para el render ----------
+$folio_str = $R && !empty($R['folio'])
+    ? str_pad((string)$R['folio'], 5, '0', STR_PAD_LEFT)
+    : '(pendiente)';
+
+$folio_str = str_pad((string)$R['folio'], 5, '0', STR_PAD_LEFT);
+$fecha_doc = $R['fecha_resguardo'];               // usa la fecha del resguardo
+$lugar     = $R['lugar'] ?? '';
+$director  = $R['director'] ?? '';
+$creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
+
+
+// ---------- Render plano (sin header/navbar para imprimir limpio) ----------
 ?>
-<style>
-    @media print {
+<!doctype html>
+<html lang="es">
 
-        .navbar,
-        .no-print {
-            display: none !important;
-        }
-
+<head>
+    <meta charset="utf-8">
+    <title>Resguardo <?= htmlspecialchars($folio_str) ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="<?= htmlspecialchars($BASE) ?>../assets/css/style.css">
+    <style>
+        html,
         body {
-            background: #fff;
+            color: var(--fg);
+            font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+                Arial, "Noto Sans", "Liberation Sans", "Apple Color Emoji", "Segoe UI Emoji",
+                "Segoe UI Symbol";
         }
+    </style>
+</head>
 
-        .card {
-            box-shadow: none !important;
-            border: none !important;
-        }
-    }
-
-    .title-res {
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: .5px;
-    }
-
-    .folio-badge {
-        font-size: 1rem;
-        font-weight: 700;
-    }
-
-    .sign-line {
-        border-top: 1px solid #333;
-        margin-top: 2.5rem;
-        padding-top: .25rem;
-        text-align: center;
-    }
-</style>
-
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-        <h1 class="h5 mb-0">Resguardo</h1>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
-            <button class="btn btn-primary btn-sm" onclick="window.print()">Imprimir</button>
-        </div>
+<body>
+    <div class="toolbar">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="btn-back" onclick="history.back()">← Volver</button>
     </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="title-res">RESGUARDO DE UNIFORME</div>
-                <div class="folio-badge">No. <?= htmlspecialchars(str_pad($R['folio'], 5, '0', STR_PAD_LEFT)) ?>/<?= (int)$R['anio'] ?></div>
-            </div>
-
-            <div class="row mt-3">
-                <div class="col-md-8">
-                    <div><strong>Empleado:</strong> <?= htmlspecialchars($R['nombre_completo']) ?></div>
-                    <?php if (!empty($R['no_empleado'])): ?>
-                        <div><strong>No. Empleado:</strong> <?= htmlspecialchars($R['no_empleado']) ?></div>
-                    <?php endif; ?>
-                    <?php if (!empty($R['puesto'])): ?>
-                        <div><strong>Puesto:</strong> <?= htmlspecialchars($R['puesto']) ?></div>
-                    <?php endif; ?>
-                </div>
-                <div class="col-md-4">
-                    <div><strong>Fecha:</strong> <?= htmlspecialchars($R['fecha']) ?></div>
-                    <div><strong>Lugar:</strong> <?= htmlspecialchars($R['lugar']) ?></div>
+    <div class="sheet">
+        <header>
+            <!-- Ajusta el src si ya tienes un logo en assets/img/logo.png -->
+            <img class="logo" src="<?= htmlspecialchars($BASE . '/assets/img/logo.png') ?>" alt="Logo" onerror="this.style.display='none'">
+            <div class="hgroup">
+                <h1>Policía Estatal de Seguridad Pública</h1>
+                <div class="sub">Resguardo de Uniforme</div>
+                <div class="folio">
+                    <div class="lbl">Folio</div>
+                    <div class="val"><?= htmlspecialchars($folio_str) ?></div>
                 </div>
             </div>
+        </header>
+        <br>
+        <main class:"contenido">
+            <section class="meta">
+                <div class="item">
+                    <div class="k">Fecha del resguardo:</div>
+                    <div class="v"><?= htmlspecialchars($fecha_doc) ?></div>
+                </div>
+                <div class="item">
+                    <div class="k">Lugar de emisión:</div>
+                    <div class="v"><?= htmlspecialchars($lugar ?: '—') ?></div>
+                </div>
+                <div class="item">
+                    <div class="k">Nombre:</div>
+                    <div class="v"><?= htmlspecialchars($S['empleado_nombre']) ?></div>
+                </div>
+                <div class="item">
+                    <div class="k">Núm. de empleado:</div>
+                    <div class="v"><?= htmlspecialchars($S['no_empleado'] ?: '—') ?></div>
+                </div>
+                <div class="item">
+                    <div class="k">Puesto:</div>
+                    <div class="v"><?= htmlspecialchars($S['puesto'] ?: '—') ?></div>
+                </div>
+            </section>
+            <br>
+            <section class="texto-intro">
+                <p>
+                    RECIBÍ DE CONFORMIDAD DE <strong><?= htmlspecialchars($director) ?></strong>, DIRECTORA DE ADMINISTRACIÓN DE LA POLICÍA ESTATAL DE SEGURIDAD PÚBLICA, UNIFORME CON LOGOS DE LA POLICÍA ESTATAL.
+                </p>
+                <p>
+                    MISMO QUE SERÁN DESTINADOS A LOS USOS PROPIOS QUE LA INSTITUCIÓN ME ENCOMIENDE, QUEDANDO BAJO MI RESPONSABILIDAD SU BUEN USO Y CONSERVACIÓN DURANTE EL TIEMPO QUE ESTÉ BAJO MI CUSTODIA.
+                </p>
+                <p><strong>DETALLE DE BIENES:</strong></p>
+            </section>
 
-            <?php if (!empty($R['observaciones'])): ?>
-                <div class="mt-2"><strong>Observaciones:</strong> <?= nl2br(htmlspecialchars($R['observaciones'])) ?></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:18%;">Código</th>
+                        <th>Descripción</th>
+                        <th style="width:16%;">Modelo</th>
+                        <th style="width:12%;">Talla</th>
+                        <th class="num" style="width:12%;">Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $total = 0;
+                    if ($DET):
+                        foreach ($DET as $d):
+                            $total += (int)$d['cantidad'];
+                    ?>
+                            <tr>
+                                <td><?= htmlspecialchars($d['codigo']) ?></td>
+                                <td><?= htmlspecialchars($d['descripcion']) ?></td>
+                                <td><?= htmlspecialchars($d['modelo']) ?></td>
+                                <td><span class="chip"><?= htmlspecialchars($d['talla']) ?></span></td>
+                                <td class="num"><?= (int)$d['cantidad'] ?></td>
+                            </tr>
+                        <?php
+                        endforeach;
+                    else:
+                        ?>
+                        <tr>
+                            <td colspan="5" style="text-align:center; color:#777;">No hay partidas en esta salida.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="num">TOTAL DE PIEZAS</td>
+                        <td class="num"><?= (int)$total ?></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <?php if (!empty($S['observaciones'])): ?>
+                <div class="note">
+                    <strong>Observaciones:</strong><br>
+                    <?= nl2br(htmlspecialchars($S['observaciones'])) ?>
+                </div>
             <?php endif; ?>
 
-            <div class="table-responsive mt-3">
-                <table class="table table-sm align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:90px" class="text-end">Cantidad</th>
-                            <th style="width:110px">Talla</th>
-                            <th>Descripción</th>
-                            <th style="width:140px">Modelo</th>
-                            <th style="width:120px">Código</th>
-                            <th style="width:140px">Categoría</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($D as $x): ?>
-                            <tr>
-                                <td class="text-end"><?= (int)$x['cantidad'] ?></td>
-                                <td><span class="chip"><?= htmlspecialchars($x['talla']) ?></span></td>
-                                <td><?= htmlspecialchars($x['descripcion']) ?></td>
-                                <td><?= htmlspecialchars($x['modelo']) ?></td>
-                                <td><?= htmlspecialchars($x['codigo']) ?></td>
-                                <td><span class="chip"><?= htmlspecialchars($x['categoria']) ?></span></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+            <section class="signs">
+                <div class="sign">
+                    <div><strong>Recibí de conformidad</strong></div>
+                    <br>
+                    <br>
+                    <div class="line"><strong><?= htmlspecialchars($S['empleado_nombre']) ?></strong></div>
+                    <div style="font-size:11px; color:#555;"></div>
+                </div>
+                <div class="sign">
+                    <div><strong>Entrega</strong></div>
+                    <br>
+                    <br>
+                    <div class="line"><strong><?= htmlspecialchars($director ?: 'Responsable de Almacén') ?></strong></div>
+                    <div style="font-size:11px; color:#555;"><strong>Directora Administrativa de la Coordinación Estatal de la Policía Estatal de Seguridad Pública</strong></div>
+                </div>
+            </section>
+        </main>
 
-            <div class="row mt-5">
-                <div class="col-md-6 text-center">
-                    <div class="sign-line">RECIBIÓ: <?= htmlspecialchars($R['nombre_completo']) ?></div>
-                </div>
-                <div class="col-md-6 text-center">
-                    <div class="sign-line">ENTREGÓ: <?= htmlspecialchars($R['director'] ?? 'Director Administrativo') ?></div>
+        <!-- Espacio reservado para que el pie fijo no se empalme con el contenido -->
+        <div class="footer-spacer"></div>
+
+        <footer class="pie-institucional">
+            <div class="pie-contenido">
+                <img class="logo2" src="<?= htmlspecialchars($BASE . '/assets/img/logo2.png') ?>"
+                    alt="Logo" onerror="this.style.display='none'">
+                <div class="info">
+                    <strong>POLICÍA ESTATAL DE SEGURIDAD PÚBLICA</strong><br>
+                    LUIS ENCINAS Y CALLEJÓN OBREGÓN, COLONIA EL TORREÓN<br>
+                    TEL. +52 (662) 218-9419 Y 218-9420<br>
+                    HERMOSILLO, SONORA, MÉXICO —
+                    <a href="https://www.sonora.gob.mx" target="_blank">www.sonora.gob.mx</a>
                 </div>
             </div>
-        </div>
+        </footer>
+
     </div>
-</div>
+</body>
 
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+</html>
