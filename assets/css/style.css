@@ -4,13 +4,16 @@
   --line: #ccc;
   --brand: #0d6efd;
   --pad: 16px;
-  --footer-h: 28mm;
+  --footer-h: 24mm; /* alto visual del pie (ajusta si tu pie crece/disminuye) */
+  --lr: 10mm; /* margen lateral (izq/der) */
+  --top: 15mm; /* margen superior */
+  --bottom: 6mm; /* margen inferior real */
 }
 
 @page {
   size: A4 portrait;
-  margin: 15mm 15mm 10mm;
-} /* margen inferior menor */
+  margin: var(--top) 11mm var(--bottom) 10mm; /* right 11mm, left 10mm */
+}
 
 html,
 body {
@@ -24,66 +27,91 @@ body {
 
 .sheet {
   width: 210mm;
-  min-height: 297mm; /* alto página */
+  min-height: 297mm;
   margin: 0 auto;
-  padding: 0mm 18mm;
   background: #fff;
   display: flex;
-  flex-direction: column; /* IMPORTANTE */
+  flex-direction: column;
+  /* Quita el padding aquí para que no “estreche” el contenido al imprimir */
+  padding: 0;
 }
 
-header {
-  display: flex;
+/* Si quieres algo de “respiración” cuando lo veas en pantalla (no impreso) */
+@media screen {
+  .sheet {
+    padding: 0 12mm;
+  }
+}
+@media print {
+  .sheet {
+    padding: 0;
+  } /* sin padding en PDF/impresión */
+}
+
+/* Header de resguardo: ocupa el ancho imprimible completo */
+.hdr-resguardo {
+  display: grid;
+  grid-template-columns: auto 1fr; /* logo | bloque de textos */
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-header .logo {
-  width: 20%;
-  height: 20%;
-}
-
-header .hgroup {
-  font-size: 20px;
-  font-weight: 700;
+  column-gap: 12px;
+  width: 100%;
   margin: 0;
-  text-align: right;
+  padding: 0;
 }
 
-header .hgroup h1 {
-  margin: 0 0 4px;
-  font-size: 30px;
-  letter-spacing: 0.1px;
+/* Logo */
+.hdr-resguardo .logo {
+  width: 110px;
+  height: auto;
 }
 
-header .hgroup .sub {
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 3px;
-  color: #555;
+/* Bloque de textos */
+.hdr-resguardo .hgroup {
+  position: relative;
   text-align: center;
 }
 
-header .hgroup .folio {
-  text-align: right;
-  min-width: 80px;
-}
-
-header .folio .lbl {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-header .folio .val {
+/* Título principal */
+.hdr-resguardo .hgroup h1 {
+  margin: 0;
   font-weight: 700;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+/* Subtítulo */
+.hdr-resguardo .hgroup .sub {
+  margin-top: 6px;
+  font-weight: 600;
   font-size: 18px;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  border: 2px solid var(--fg);
-  border-radius: 6px;
+  color: #555;
+}
+
+/* Folio anclado arriba-derecha del bloque de textos */
+.hdr-resguardo .hgroup .folio {
+  position: absolute;
+  top: 0;
+  right: 0;
+  text-align: right;
+}
+.hdr-resguardo .hgroup .folio .lbl {
+  font-size: 10px;
+  color: #666;
+}
+.hdr-resguardo .hgroup .folio .val {
   display: inline-block;
+  border: 2px solid #000;
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* Sin relleno adicional al imprimir (la hoja ya usa @page) */
+@media print {
+  .hdr-resguardo {
+    padding-inline: 0;
+  }
 }
 
 /* El contenido ocupa el espacio restante */
@@ -275,45 +303,23 @@ footer.pie-institucional a:hover {
 }
 
 @media print {
-  .toolbar {
-    display: none !important;
-  }
-
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
+  .toolbar {
+    display: none !important;
+  }
   .sheet {
     position: relative;
   }
 
-  /* --- FIRMAS FIJAS SOBRE EL PIE --- */
-  .signs {
-    position: fixed;
-    left: 15mm;
-    right: 15mm;
-    bottom: 38mm; /* queda justo encima del pie */
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 22px;
-    text-align: center;
-    page-break-inside: avoid;
-  }
-
-  /* Ajuste visual de las líneas de firma */
-  .sign .line {
-    border-top: 1px solid #000;
-    margin-top: 20px;
-    padding-top: 4px;
-  }
-
-  /* --- PIE PEGADO AL BORDE INFERIOR --- */
+  /* Pie pegado al borde inferior dentro de los márgenes @page */
   footer.pie-institucional {
     position: fixed;
-    left: 15mm;
-    right: 15mm;
-    bottom: 6mm; /* antes 16mm → más pegado */
+    left: var(--lr);
+    right: var(--lr);
+    bottom: var(--bottom);
     background: #fff;
     border-top: 1px solid #bbb;
     padding-top: 3mm;
@@ -321,7 +327,6 @@ footer.pie-institucional a:hover {
     color: #333;
     page-break-inside: avoid;
   }
-
   footer.pie-institucional .pie-contenido {
     display: flex;
     align-items: center;
@@ -330,25 +335,32 @@ footer.pie-institucional a:hover {
     flex-wrap: wrap;
     text-align: center;
   }
-
   footer.pie-institucional .logo2 {
     width: 25%;
     height: auto;
     flex-shrink: 0;
   }
-
   footer.pie-institucional .info {
     max-width: 360px;
     margin: 0;
   }
 
-  /* --- ELIMINA CABECERAS Y PIE DE NAVEGADOR --- */
-  @page {
-    size: A4 portrait;
-    margin: 15mm 15mm 8mm; /* margen inferior mínimo */
+  /* Firmas fijas justo encima del pie */
+  .signs {
+    position: fixed;
+    left: var(--lr);
+    right: var(--lr);
+    bottom: calc(
+      var(--bottom) + var(--footer-h)
+    ); /* firmas justo arriba del pie */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    text-align: center;
+    page-break-inside: avoid;
   }
 
-  /* Evita saltos innecesarios */
+  /* Relaja cortes para que no empuje el pie a otra página */
   .note,
   table,
   .table-wrap {

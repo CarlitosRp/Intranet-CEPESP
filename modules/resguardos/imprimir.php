@@ -130,18 +130,21 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
         <button class="btn-back" onclick="history.back()">← Volver</button>
     </div>
     <div class="sheet">
-        <header>
-            <!-- Ajusta el src si ya tienes un logo en assets/img/logo.png -->
-            <img class="logo" src="<?= htmlspecialchars($BASE . '/assets/img/logo.png') ?>" alt="Logo" onerror="this.style.display='none'">
+        <header class="hdr-resguardo">
+            <img class="logo" src="<?= htmlspecialchars($BASE . '/assets/img/logo.png') ?>"
+                alt="Logo" onerror="this.style.display='none'">
+
             <div class="hgroup">
                 <h1>Policía Estatal de Seguridad Pública</h1>
                 <div class="sub">Resguardo de Uniforme</div>
+
                 <div class="folio">
                     <div class="lbl">Folio</div>
                     <div class="val"><?= htmlspecialchars($folio_str) ?></div>
                 </div>
             </div>
         </header>
+
         <br>
         <main class:"contenido">
             <section class="meta">
