@@ -60,14 +60,15 @@ $next = (int)($maxRow[0]['mx'] ?? 0) + 1;
 $folio = str_pad((string)$next, 5, '0', STR_PAD_LEFT);
 
 // 4) Insertar
-$director = null;        // lo puedes llenar fijo o traer de otra tabla/config
+$director = 'ING. MARIA DEL CELIA CARMEN PEÑA TORRES';        // lo puedes llenar fijo o traer de otra tabla/config
 $lugar    = 'Hermosillo, Sonora';
+$hoy      = date('Y-m-d');
 
 $stmt = mysqli_prepare($cn, "
-  INSERT INTO resguardos (id_salida, folio, anio, lugar, director)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT INTO resguardos (id_salida, folio, anio, fecha, lugar, director)
+  VALUES (?, ?, ?, ?, ?, ?)
 ");
-mysqli_stmt_bind_param($stmt, 'isiss', $id_salida, $folio, $anio, $lugar, $director);
+mysqli_stmt_bind_param($stmt, 'isisss', $id_salida, $folio, $anio, $hoy, $lugar, $director);
 
 try {
     $ok = mysqli_stmt_execute($stmt);

@@ -38,10 +38,11 @@ $director = 'ING. MARIA DEL CELIA CARMEN PEÑA TORRES';
 $lugar    = 'Hermosillo, Sonora.';
 $hoy      = date('Y-m-d');
 $user     = $_SESSION['auth_user_email'] ?? 'sistema';
+$anio     = (int)date('Y');
 
 // Insertar
-$stmt = mysqli_prepare($cn, "INSERT INTO resguardos (folio, id_salida, fecha, director, lugar, creado_por) VALUES (?, ?, ?, ?, ?, ?)");
-mysqli_stmt_bind_param($stmt, 'iissss', $nextFolio, $id_salida, $hoy, $director, $lugar, $user);
+$stmt = mysqli_prepare($cn, "INSERT INTO resguardos (anio, folio, id_salida, fecha, director, lugar, creado_por) VALUES (?, ?, ?, ?, ?, ?, ?)");
+mysqli_stmt_bind_param($stmt, 'iiissss', $anio, $nextFolio, $id_salida, $hoy, $director, $lugar, $user);
 
 try {
     $ok = mysqli_stmt_execute($stmt);
@@ -50,7 +51,7 @@ try {
     mysqli_stmt_close($stmt);
 
     // Redirige directo a imprimir con id_resguardo
-    header('Location: ' . BASE_URL . 'modules/resguardos/imprimir.php?id_resguardo=' . $new_id);
+    header('Location: ' . BASE_URL . '/modules/resguardos/imprimir.php?id_resguardo=' . $new_id);
     exit;
 } catch (mysqli_sql_exception $ex) {
     if (isset($stmt)) mysqli_stmt_close($stmt);
