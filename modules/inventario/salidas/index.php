@@ -191,11 +191,14 @@ $mk = function ($p) use ($desde, $hasta, $emp, $rgdo) {
                                         <a class="btn btn-sm btn-outline-secondary" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar.php?id=' . (int)$r['id_salida']) ?>">Editar</a>
 
                                         <?php if (empty($r['id_resguardo']) && (int)$r['total_pzas'] > 0): ?>
-                                            <form method="post" action="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/generar_resguardo.php') ?>" class="d-inline"
+                                            <!-- Dentro del loop de filas (usa la variable correcta de la fila, p.ej. $s o $row) -->
+                                            <form method="post"
+                                                action="<?= BASE_URL ?>/modules/inventario/salidas/generar_resguardo.php"
+                                                class="d-inline"
                                                 onsubmit="return confirm('¿Generar resguardo para esta salida?');">
-                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                                                 <input type="hidden" name="id_salida" value="<?= (int)$r['id_salida'] ?>">
-                                                <button class="btn btn-sm btn-primary">Generar resguardo</button>
+                                                <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                                                <button class="btn btn-sm btn-outline-primary">Generar Resguardo</button>
                                             </form>
                                         <?php endif; ?>
 

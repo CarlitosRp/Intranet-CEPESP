@@ -68,3 +68,20 @@ function auth_has_role(string $roleName): bool
     if (!$u) return false;
     return strtolower($u['role'] ?? '') === strtolower($roleName);
 }
+
+// === Compatibilidad con funciones usadas por nuevos módulos ===
+
+// Retorna true si hay sesión activa
+if (!function_exists('auth_is_logged_in')) {
+    function auth_is_logged_in(): bool {
+        return !empty($_SESSION['user']);
+    }
+}
+
+// Devuelve los datos del usuario actual
+if (!function_exists('auth_current_user')) {
+    function auth_current_user(): array {
+        return $_SESSION['user'] ?? ['email' => 'sistema'];
+    }
+}
+
