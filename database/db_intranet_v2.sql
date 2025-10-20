@@ -125,27 +125,33 @@ CREATE TABLE IF NOT EXISTS salidas_detalle (
   INDEX idx_sd_var (id_variante)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =============== RESGUARDOS (1:1 con salida que genera PDF) =====
-CREATE TABLE IF NOT EXISTS resguardos (
-  id_resguardo INT AUTO_INCREMENT PRIMARY KEY,
-  id_salida    INT NOT NULL,
+-- --------------------------------------------------------
+-- Estructura de tabla para la tabla `resguardos`
+-- --------------------------------------------------------
 
-  anio   INT NOT NULL,
-  folio  INT NOT NULL,
-  fecha  DATE NOT NULL,
-  lugar    VARCHAR(80)  DEFAULT NULL,
-  director VARCHAR(120) DEFAULT NULL,
-  creado_por VARCHAR(60) DEFAULT NULL,
-
-  UNIQUE KEY uq_resguardo_anio_folio (anio, folio),
-  KEY idx_resg_id_salida (id_salida),
-
-  CONSTRAINT fk_resguardos_salida
-    FOREIGN KEY (id_salida)
-    REFERENCES salidas (id_salida)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
+CREATE TABLE `resguardos` (
+  `id_resguardo` INT(11) NOT NULL AUTO_INCREMENT,
+  `id_salida` INT(11) NOT NULL,
+  `anio` INT(11) NOT NULL,
+  `folio` INT(11) NOT NULL,
+  `fecha` DATE NOT NULL,
+  `lugar` VARCHAR(80) DEFAULT NULL,
+  `director` VARCHAR(120) DEFAULT NULL,
+  `creado_por` VARCHAR(60) DEFAULT NULL,
+  PRIMARY KEY (`id_resguardo`),
+  UNIQUE KEY `uq_resguardo_anio_folio` (`anio`, `folio`),
+  UNIQUE KEY `uq_resguardo_salida` (`id_salida`),
+  KEY `idx_resg_id_salida` (`id_salida`),
+  CONSTRAINT `fk_resguardos_salida` FOREIGN KEY (`id_salida`) REFERENCES `salidas` (`id_salida`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Notas:
+--  - Cada salida sólo puede tener un resguardo asociado.
+--  - El folio es único por año (`anio`, `folio`).
+--  - El campo `fecha` guarda la fecha exacta de creación del resguardo.
+--  - `creado_por` almacena el usuario (email o identificador) que lo generó.
+-- --------------------------------------------------------
 
 -- 5) FOLIOS (reinicio anual) + LOG DE REIMPRESIONES
 CREATE TABLE IF NOT EXISTS folio_series (
@@ -261,17 +267,17 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '4'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '6.5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7' FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '7.5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '8.5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '9'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '9 1/2' FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '9.5' FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '10.5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '11'  FROM equipo WHERE codigo='BOTA-12401';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '11 1/2'  FROM equipo WHERE codigo='BOTA-12401';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '11.5'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '12' FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '13'  FROM equipo WHERE codigo='BOTA-12401';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '14'  FROM equipo WHERE codigo='BOTA-12401';
@@ -360,3 +366,20 @@ INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM 
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
+
+/*--- Entrada Inicial ---*/
+INSERT INTO `entradas` (`fecha`, `proveedor`, `factura`, `observaciones`, `creado_por`) VALUES
+('2025-10-13', 'COMPAÑIA MEXICANA DE PROTECCIÓN S. DE R.L. DE C.V.', 'Acta de Entrega-Recepción', '', 'admin@local');
+
+/*--- Entrada Detalle Inicial ---*/
+INSERT INTO `entradas_detalle` (`id_entrada`, `id_variante`, `cantidad`) VALUES
+(1, 57, 1),
+(1, 20, 39),
+(1, 25, 1),
+(1, 7, 5),
+(1, 8, 20),
+(1, 11, 78),
+(1, 12, 13),
+(1, 14, 15),
+(1, 16, 23),
+(1, 18, 5);

@@ -184,10 +184,10 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                 <thead>
                     <tr>
                         <th style="width:18%;">Código</th>
-                        <th>Descripción</th>
                         <th style="width:16%;">Modelo</th>
+                        <th>Descripción</th>
                         <th style="width:12%;">Talla</th>
-                        <th class="num" style="width:12%;">Cantidad</th>
+                        <th class="num" style="width:12%;">Cantidad</th>                                                
                     </tr>
                 </thead>
                 <tbody>
@@ -199,10 +199,10 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                     ?>
                             <tr>
                                 <td><?= htmlspecialchars($d['codigo']) ?></td>
-                                <td><?= htmlspecialchars($d['descripcion']) ?></td>
                                 <td><?= htmlspecialchars($d['modelo']) ?></td>
+                                <td><?= htmlspecialchars($d['descripcion']) ?></td>
                                 <td><span class="chip"><?= htmlspecialchars($d['talla']) ?></span></td>
-                                <td class="num"><?= (int)$d['cantidad'] ?></td>
+                                <td class="num"><?= (int)$d['cantidad'] ?></td>                                                                
                             </tr>
                         <?php
                         endforeach;
