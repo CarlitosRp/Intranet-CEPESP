@@ -204,7 +204,7 @@ $mk = function ($p) use ($desde, $hasta, $emp, $rgdo) {
 
                                         <?php if (!empty($r['id_resguardo'])): ?>
                                             <a class="btn btn-sm btn-success" target="_blank"
-                                                href="<?= htmlspecialchars($BASE . '/modules/resguardos/imprimir.php?id=' . (int)$r['id_resguardo']) ?>">
+                                                href="<?= htmlspecialchars($BASE . '/modules/resguardos/imprimir.php?id_resguardo=' . (int)$r['id_resguardo']) ?>">
                                                 Imprimir
                                             </a>
                                         <?php endif; ?>

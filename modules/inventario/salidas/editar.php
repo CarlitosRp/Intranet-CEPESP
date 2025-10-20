@@ -313,6 +313,21 @@ render_breadcrumb([
     ['label' => 'Salidas',    'href' => $BASE . '/modules/inventario/salidas/index.php'],
     ['label' => 'Editar']
 ]);
+
+$id_salida = (int)$S['id_salida'];
+
+// ¿Ya existe resguardo para esta salida?
+$R = db_select_all("
+  SELECT id_resguardo
+  FROM resguardos
+  WHERE id_salida = {$id_salida}
+  LIMIT 1
+");
+$id_resguardo = ($R && empty($R['_error']) && !empty($R[0]['id_resguardo'])) ? (int)$R[0]['id_resguardo'] : 0;
+$href_imprimir = ($id_resguardo > 0)
+    ? BASE_URL . '/modules/resguardos/imprimir.php?id_resguardo=' . $id_resguardo
+    : '';
+
 ?>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -321,20 +336,20 @@ render_breadcrumb([
             <?php require_once __DIR__ . '/../../../includes/csrf.php'; ?>
             ...
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-secondary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
-                <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar_cabecera.php?id=' . (int)$S['id_salida']) ?>">Editar cabecera</a>
-
-                <form method="post"
-                    action="<?= htmlspecialchars($BASE . '/modules/resguardos/crear.php') ?>"
-                    class="d-inline">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="id_salida" value="<?= (int)$S['id_salida'] ?>">
-                    <button class="btn btn-success btn-sm"
-                        onclick="return confirm('Se generará un nuevo resguardo para esta salida. ¿Continuar?')">
+                <?php if ($id_resguardo > 0): ?>
+                    <a class="btn btn-outline-primary" href="<?= htmlspecialchars($href_imprimir) ?>" target="_blank">
+                        Imprimir resguardo
+                    </a>
+                    <button class="btn btn-outline-secondary" disabled title="Ya existe resguardo para esta salida">
                         Generar resguardo
                     </button>
-                </form>
-                <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/crear.php') ?>">Nueva salida</a>
+                <?php else: ?>
+                    <form method="post" action="<?= htmlspecialchars(BASE_URL . '/modules/resguardos/crear.php') ?>" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                        <input type="hidden" name="id_salida" value="<?= $id_salida ?>">
+                        <button class="btn btn-primary" type="submit">Generar resguardo</button>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
     </div>
