@@ -67,7 +67,7 @@ $total_pzas_global = 0;
 if ($id_empleado > 0) {
     $rows = db_select_all("
     SELECT
-      r.id_resguardo, r.folio, r.anio, r.lugar, r.creado_en, r.director,
+      r.id_resguardo, r.folio, r.anio, r.lugar, r.director,
       s.id_salida, s.fecha,
       COALESCE(t.total_pzas,0) AS total_pzas
     FROM resguardos r

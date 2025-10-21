@@ -184,25 +184,25 @@ if (!empty($_GET['export']) && $_GET['export'] === 'csv') {
     $out = fopen('php://output', 'w');
 
     if ($agrupar === 'producto') {
-        fputcsv($out, ['Código', 'Descripción', 'Modelo', 'Categoría', 'Maneja talla', 'Existencias']);
+        fputcsv($out, ['Código', 'Modelo', 'Categoría', 'Descripción', 'Maneja talla', 'Existencias']);
         foreach ($rows as $r) {
             fputcsv($out, [
                 $r['codigo'],
-                $r['descripcion'],
                 $r['modelo'],
                 $r['categoria'],
+                $r['descripcion'],
                 ((int)$r['maneja_talla'] === 1 ? 'Sí' : 'No'),
                 (int)$r['existencias']
             ]);
         }
     } else {
-        fputcsv($out, ['Código', 'Descripción', 'Modelo', 'Categoría', 'Talla', 'Existencias']);
+        fputcsv($out, ['Código', 'Modelo', 'Categoría', 'Descripción', 'Talla', 'Existencias']);
         foreach ($rows as $r) {
             fputcsv($out, [
                 $r['codigo'],
-                $r['descripcion'],
                 $r['modelo'],
                 $r['categoria'],
+                $r['descripcion'],
                 $r['talla'],
                 (int)$r['existencias']
             ]);
@@ -318,9 +318,9 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
                         <thead class="table-light">
                             <tr>
                                 <th>Código</th>
-                                <th>Descripción</th>
                                 <th>Modelo</th>
                                 <th>Categoría</th>
+                                <th>Descripción</th>
                                 <?php if ($agrupar === 'talla'): ?>
                                     <th>Talla</th>
                                 <?php else: ?>
@@ -333,10 +333,9 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
                             <?php foreach ($rows as $r): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($r['codigo']) ?></td>
-                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                     <td><?= htmlspecialchars($r['modelo']) ?></td>
                                     <td><span class="chip"><?= htmlspecialchars($r['categoria']) ?></span></td>
-
+                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                     <?php if ($agrupar === 'talla'): ?>
                                         <td><span class="chip"><?= htmlspecialchars($r['talla']) ?></span></td>
                                     <?php else: ?>

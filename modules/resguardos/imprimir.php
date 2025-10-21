@@ -168,8 +168,7 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                     <div class="k">Puesto:</div>
                     <div class="v"><?= htmlspecialchars($S['puesto'] ?: '—') ?></div>
                 </div>
-            </section>
-            <br>
+            </section>            
             <section class="texto-intro">
                 <p>
                     RECIBÍ DE CONFORMIDAD DE <strong><?= htmlspecialchars($director) ?></strong>, DIRECTORA DE ADMINISTRACIÓN DE LA POLICÍA ESTATAL DE SEGURIDAD PÚBLICA, UNIFORME CON LOGOS DE LA POLICÍA ESTATAL.
@@ -177,7 +176,7 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                 <p>
                     MISMO QUE SERÁN DESTINADOS A LOS USOS PROPIOS QUE LA INSTITUCIÓN ME ENCOMIENDE, QUEDANDO BAJO MI RESPONSABILIDAD SU BUEN USO Y CONSERVACIÓN DURANTE EL TIEMPO QUE ESTÉ BAJO MI CUSTODIA.
                 </p>
-                <p><strong>DETALLE DE BIENES:</strong></p>
+                <p style="text-align: center"><strong>DETALLE DE BIENES:</strong></p>
             </section>
 
             <table>
@@ -201,7 +200,7 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                                 <td><?= htmlspecialchars($d['codigo']) ?></td>
                                 <td><?= htmlspecialchars($d['modelo']) ?></td>
                                 <td><?= htmlspecialchars($d['descripcion']) ?></td>
-                                <td><span class="chip"><?= htmlspecialchars($d['talla']) ?></span></td>
+                                <td><span><?= htmlspecialchars($d['talla']) ?></span></td>
                                 <td class="num"><?= (int)$d['cantidad'] ?></td>                                                                
                             </tr>
                         <?php
@@ -241,7 +240,7 @@ $creado_por = $R['creado_por'] ?? ($S['creado_por'] ?? 'sistema');
                     <br>
                     <br>
                     <div class="line"><strong><?= htmlspecialchars($director ?: 'Responsable de Almacén') ?></strong></div>
-                    <div style="font-size:11px; color:#555;"><strong>Directora Administrativa de la Coordinación Estatal de la Policía Estatal de Seguridad Pública</strong></div>
+                    <div style="font-size:12px;"><strong>Directora Administrativa de la Coordinación Estatal de la Policía Estatal de Seguridad Pública</strong></div>
                 </div>
             </section>
         </main>

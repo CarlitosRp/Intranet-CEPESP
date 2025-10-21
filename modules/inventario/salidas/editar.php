@@ -328,30 +328,65 @@ $href_imprimir = ($id_resguardo > 0)
     ? BASE_URL . '/modules/resguardos/imprimir.php?id_resguardo=' . $id_resguardo
     : '';
 
+// === Resguardo vinculado (si existe) ===
+$RES = db_select_all("
+  SELECT id_resguardo, anio, folio
+  FROM resguardos
+  WHERE id_salida = {$id_salida}
+  LIMIT 1
+");
+
+$has_resguardo = ($RES && empty($RES['_error']) && isset($RES[0]));
+$res_id        = 0;
+$folio_str     = '';
+$href_imprimir = '';
+
+if ($has_resguardo) {
+    $res_id        = (int)$RES[0]['id_resguardo'];
+    $folio_str     = str_pad((string)$RES[0]['folio'], 5, '0', STR_PAD_LEFT);
+    $href_imprimir = BASE_URL . '/modules/resguardos/imprimir.php?id_resguardo=' . $res_id;
+}
 ?>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Salida No. <?= htmlspecialchars(str_pad((string)$S['id_salida'], 5, '0', STR_PAD_LEFT)) ?></h1>
+        <?php if ($has_resguardo): ?>
+            <div class="alert alert-success alert-dismissible fade show auto-hide mt-2" role="alert">
+                <span class="me-2">
+                    Ya existe resguardo <strong>No. <?= htmlspecialchars($folio_str) ?></strong> para esta salida.
+                </span>                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        <?php endif; ?>
+
         <div class="d-flex gap-2">
-            <?php require_once __DIR__ . '/../../../includes/csrf.php'; ?>            
-            <div class="d-flex gap-2">
+            <?php require_once __DIR__ . '/../../../includes/csrf.php'; ?>
+            <div class="d-flex gap-2 align-items-center">
                 <a class="btn btn-outline-secondary" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/index.php') ?>">← Volver</a>
                 <a class="btn btn-primary" href="<?= htmlspecialchars($BASE . '/modules/inventario/salidas/editar_cabecera.php?id=' . (int)$S['id_salida']) ?>">Editar cabecera</a>
-                <?php if ($id_resguardo > 0): ?>
-                    <a class="btn btn-outline-primary" href="<?= htmlspecialchars($href_imprimir) ?>" target="_blank">
+                <?php if ($has_resguardo): ?>
+                    <a class="btn btn-outline-primary"
+                        href="<?= htmlspecialchars($href_imprimir) ?>" target="_blank">
                         Imprimir resguardo
                     </a>
-                    <button class="btn btn-outline-secondary" disabled title="Ya existe resguardo para esta salida">
+                    <button class="btn btn-outline-secondary" disabled
+                        title="Ya existe resguardo para esta salida">
                         Generar resguardo
                     </button>
                 <?php else: ?>
-                    <form method="post" action="<?= htmlspecialchars(BASE_URL . '/modules/resguardos/crear.php') ?>" class="d-inline">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-                        <input type="hidden" name="id_salida" value="<?= $id_salida ?>">
-                        <button class="btn btn-primary" type="submit">Generar resguardo</button>
+                    <form method="post"
+                        action="<?= htmlspecialchars(BASE_URL . 'modules/resguardos/crear.php') ?>"
+                        class="d-inline">
+                        <input type="hidden" name="csrf_token"
+                            value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                        <input type="hidden" name="id_salida" value="<?= (int)$id_salida ?>">
+                        <button class="btn btn-primary" type="submit">
+                            Generar resguardo
+                        </button>
                     </form>
                 <?php endif; ?>
             </div>
+
         </div>
     </div>
 

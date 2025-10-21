@@ -22,9 +22,9 @@ if ($q !== '') {
     $qEsc = mysqli_real_escape_string($cn, $q);
     $where .= " AND (
     codigo LIKE '%$qEsc%' OR
-    descripcion LIKE '%$qEsc%' OR
     modelo LIKE '%$qEsc%' OR
     categoria LIKE '%$qEsc%' OR
+    descripcion LIKE '%$qEsc%' OR    
     talla LIKE '%$qEsc%'
   )";
 }
@@ -34,21 +34,21 @@ $from = "FROM v_existencias";
 
 if ($agrupar === 'talla') {
     $sql = "
-    SELECT codigo, descripcion, modelo, categoria, talla, existencias
+    SELECT codigo, modelo, categoria, descripcion, talla, existencias
     $from
     WHERE $where
     ORDER BY descripcion ASC, talla ASC
   ";
-    $headers = ['Código', 'Descripción', 'Modelo', 'Categoría', 'Talla', 'Existencias'];
+    $headers = ['Código', 'Modelo', 'Categoría', 'Descripción', 'Talla', 'Existencias'];
 } else {
     $sql = "
-    SELECT codigo, descripcion, modelo, categoria, SUM(existencias) AS existencias
+    SELECT codigo, modelo, categoria, descripcion, SUM(existencias) AS existencias
     $from
     WHERE $where
-    GROUP BY codigo, descripcion, modelo, categoria
+    GROUP BY codigo, modelo, categoria, descripcion
     ORDER BY descripcion ASC
   ";
-    $headers = ['Código', 'Descripción', 'Modelo', 'Categoría', 'Existencias'];
+    $headers = ['Código', 'Modelo', 'Categoría', 'Descripción', 'Existencias'];
 }
 $rows = db_select_all($sql);
 if (isset($rows['_error'])) $rows = [];
@@ -105,18 +105,18 @@ require_once __DIR__ . '/../../../includes/header.php';
                             <?php if ($agrupar === 'talla'): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($r['codigo']) ?></td>
-                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                     <td><?= htmlspecialchars($r['modelo']) ?></td>
                                     <td><?= htmlspecialchars($r['categoria']) ?></td>
+                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>                                    
                                     <td><?= htmlspecialchars($r['talla']) ?></td>
                                     <td><?= (int)$r['existencias'] ?></td>
                                 </tr>
                             <?php else: ?>
                                 <tr>
                                     <td><?= htmlspecialchars($r['codigo']) ?></td>
-                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                     <td><?= htmlspecialchars($r['modelo']) ?></td>
                                     <td><?= htmlspecialchars($r['categoria']) ?></td>
+                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>                                    
                                     <td><?= (int)$r['existencias'] ?></td>
                                 </tr>
                             <?php endif; ?>
