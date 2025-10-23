@@ -215,11 +215,18 @@ if (!empty($_GET['export']) && $_GET['export'] === 'csv') {
 // ================== Render ==================
 require_once __DIR__ . '/../../../includes/header.php';
 require_once __DIR__ . '/../../../includes/breadcrumbs.php';
-render_breadcrumb([
-    ['label' => 'Inventario'],
-    ['label' => 'Existencias']
-]);
+?>
 
+<div class="no-print">
+    <?php
+    render_breadcrumb([
+        ['label' => 'Inventario'],
+        ['label' => 'Existencias']
+    ]);
+    ?>
+</div>
+
+<?php
 // Helper URL de paginación manteniendo filtros
 $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
     $qs = ['page' => $p];
@@ -230,28 +237,18 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
     return 'index.php?' . http_build_query($qs);
 };
 ?>
-<style>
-    @media print {
-
-        .navbar,
-        .no-print {
-            display: none !important;
-        }
-
-        body {
-            background: #fff;
-        }
-
-        .card {
-            box-shadow: none !important;
-            border: none !important;
-        }
-    }
-</style>
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h5 mb-0">Existencias (netas)</h1>
+        <div class="no-print">
+            <h1 class="h5 mb-0">Existencias</h1>
+        </div>
+        <!-- Encabezado SOLO para impresión -->
+        <div class="print-header d-none">
+            <div class="ph-title">Inventario · Existencias</div>
+            <div class="ph-meta">Corte: <?= htmlspecialchars(date('d-m-Y')) ?></div>
+        </div>
+
         <div class="d-flex gap-2 no-print">
             <?php
             // Mantener filtros en los enlaces de acción
@@ -262,8 +259,8 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
             if ($mostrar0)    $qsBase['mostrar0'] = 1;
             $qsCsv  = http_build_query(array_merge($qsBase, ['export' => 'csv']));
             ?>
-            <a class="btn btn-outline-success btn-sm" href="index.php?<?= htmlspecialchars($qsCsv) ?>">Exportar Excel (CSV)</a>
-            <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Imprimir / PDF</button>
+            <a class="btn btn-outline-success btn-sm no-print" href="index.php?<?= htmlspecialchars($qsCsv) ?>">Exportar Excel (CSV)</a>
+            <button class="btn btn-outline-primary btn-sm no-print" onclick="window.print()">Imprimir / PDF</button>
         </div>
     </div>
 
@@ -314,41 +311,41 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
                 <div class="text-muted">Sin resultados con el filtro actual.</div>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table table-sm align-middle">
-                        <thead class="table-light">
+                    <table class="table table-sm table-striped table-report">
+                        <colgroup>
+                            <col style="width:16%"> <!-- Código -->
+                            <col style="width:12%"> <!-- Modelo -->
+                            <col> <!-- Descripción (rellena el resto) -->
+                            <col style="width:10%"> <!-- Talla -->
+                            <col style="width:14%"> <!-- Existencias -->
+                        </colgroup>
+                        <thead>
                             <tr>
                                 <th>Código</th>
                                 <th>Modelo</th>
-                                <th>Categoría</th>
                                 <th>Descripción</th>
-                                <?php if ($agrupar === 'talla'): ?>
-                                    <th>Talla</th>
-                                <?php else: ?>
-                                    <th>Maneja Talla</th>
-                                <?php endif; ?>
-                                <th class="text-end" style="width:140px">Existencias</th>
+                                <th class="text-center">Talla</th>
+                                <th class="text-end">Existencias</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($rows as $r): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($r['codigo']) ?></td>
-                                    <td><?= htmlspecialchars($r['modelo']) ?></td>
-                                    <td><span class="chip"><?= htmlspecialchars($r['categoria']) ?></span></td>
+                                    <td class="text-monospace"><?= htmlspecialchars($r['codigo']) ?></td>
+                                    <td class="text-monospace"><?= htmlspecialchars($r['modelo']) ?></td>
                                     <td><?= htmlspecialchars($r['descripcion']) ?></td>
                                     <?php if ($agrupar === 'talla'): ?>
-                                        <td><span class="chip"><?= htmlspecialchars($r['talla']) ?></span></td>
+                                        <td><?= htmlspecialchars($r['talla']) ?></td>
                                     <?php else: ?>
                                         <td>
                                             <?php if ((int)$r['maneja_talla'] === 1): ?>
-                                                <span class="badge bg-primary">Sí</span>
+                                                Sí
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">No</span>
+                                                No
                                             <?php endif; ?>
                                         </td>
                                     <?php endif; ?>
-
-                                    <td class="text-end"><?= (int)$r['existencias'] ?></td>
+                                    <td class="text-end"><?= number_format((int)$r['existencias']) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

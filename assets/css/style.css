@@ -372,3 +372,82 @@ footer.pie-institucional a:hover {
     page-break-inside: auto;
   }
 }
+
+/* =====================================================================
+   IMPRESIÓN · INVENTARIO (EXISTENCIAS)
+   Nota: este bloque no toca clases de resguardos. Usa selectores propios:
+         .print-header, .table-report, .no-print, etc.
+   ===================================================================== */
+
+/* Para uso en pantalla también */
+.d-none { display: none !important; }
+
+/* Encabezado exclusivo de impresión (lo activamos en @media print) */
+.print-header {
+  display: none; /* en pantalla oculto */
+}
+.print-header .ph-title {
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 2px;
+}
+.print-header .ph-meta {  
+  font-size: 16px;
+}
+
+/* Tabla de existencias (usada en index.php) */
+.table-report {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* respeta los <colgroup> */
+  border: 1px solid var(--line);
+}
+.table-report thead th {
+  background: #f4f6f8;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 8px;
+}
+.table-report tbody td {
+  border-top: 1px solid var(--line);
+  padding: 6px 8px;
+  vertical-align: top;
+}
+.table-report tbody tr:nth-child(even){
+  background: #fafbfc;
+}
+.table-report .text-end    { text-align: right !important; }
+.table-report .text-center { text-align: center !important; }
+
+/* ===================== MODO IMPRESIÓN (EXISTENCIAS) ===================== */
+@media print {
+  /* Oculta elementos del layout general de la intranet */
+  .navbar,
+  .no-print,
+  .btn,
+  .pagination,
+  .alert {
+    display: none !important;
+  }
+
+  /* Usa todo el ancho; quita paddings y max-widths del layout */
+  .container, .container-fluid {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Muestra encabezado de impresión */
+  .print-header { display: block !important; margin-bottom: 8px; }
+
+  /* Repite el thead y evita cortes feos */
+  .table-report thead { display: table-header-group; }
+  .table-report tr { page-break-inside: avoid; }
+
+  /* Si tu tabla no usa .table-report, fuerza bordes básicos como fallback */
+  table.table-report th, table.table-report td {
+    border: 1px solid var(--line);
+  }
+}
+
