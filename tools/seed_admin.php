@@ -21,7 +21,7 @@ if (!empty($check) && empty($check['_error'])) {
 // Crear admin
 $name  = 'Administrador';
 $dept  = 'Sistemas';
-$pass_plain = 'admin123'; // cámbiala después de entrar
+$pass_plain = 'admin35577'; // cámbiala después de entrar
 $hash = password_hash($pass_plain, PASSWORD_DEFAULT);
 
 // Escapar

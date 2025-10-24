@@ -284,34 +284,34 @@ INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '14'  FRO
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '15'  FROM equipo WHERE codigo='BOTA-12401';
 
 /* --- PANTALÓN táctico caballero azul marino 74369 (waist*length) --- */
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*30' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*30' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*30' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*30' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*30' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*32' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*34' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42*36' FROM equipo WHERE codigo='PANT-74369';
-INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '44*32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28x30' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '28x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30x30' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '30x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32x30' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '32x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34x30' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '34x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36x30' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '36x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '38x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '40x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42x32' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42x34' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '42x36' FROM equipo WHERE codigo='PANT-74369';
+INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '44x32' FROM equipo WHERE codigo='PANT-74369';
 
 /* --- PANTALÓN táctico dama azul marino 643886 (waist*length) --- */
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, '2 R' FROM equipo WHERE codigo='PANT-643886';
@@ -366,20 +366,3 @@ INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM 
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
-
-/*--- Entrada Inicial ---*/
-INSERT INTO `entradas` (`fecha`, `proveedor`, `factura`, `observaciones`, `creado_por`) VALUES
-('2025-10-13', 'COMPAÑIA MEXICANA DE PROTECCIÓN S. DE R.L. DE C.V.', 'Acta de Entrega-Recepción', '', 'admin@local');
-
-/*--- Entrada Detalle Inicial ---*/
-INSERT INTO `entradas_detalle` (`id_entrada`, `id_variante`, `cantidad`) VALUES
-(1, 57, 1),
-(1, 20, 39),
-(1, 25, 1),
-(1, 7, 5),
-(1, 8, 20),
-(1, 11, 78),
-(1, 12, 13),
-(1, 14, 15),
-(1, 16, 23),
-(1, 18, 5);
