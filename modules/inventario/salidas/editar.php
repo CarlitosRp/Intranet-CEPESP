@@ -375,7 +375,7 @@ if ($has_resguardo) {
                     </button>
                 <?php else: ?>
                     <form method="post"
-                        action="<?= htmlspecialchars(BASE_URL . 'modules/resguardos/crear.php') ?>"
+                        action="<?= htmlspecialchars(BASE_URL . '/modules/resguardos/crear.php') ?>"
                         class="d-inline">
                         <input type="hidden" name="csrf_token"
                             value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">

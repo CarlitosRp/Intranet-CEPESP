@@ -210,7 +210,7 @@ render_breadcrumb([
     </div>
 
     <!-- Filtros -->
-    <form method="get" action="reporte_categoria.php" class="row g-2 mb-3 no-print">
+    <form method="get" action="reporte_categoria.php" class="row g-2 mb-3 no-print d-flex flex-row align-items-center">
         <div class="col-md-3">
             <label class="form-label">Desde</label>
             <input type="date" name="desde" value="<?= htmlspecialchars($desde) ?>" class="form-control">
@@ -309,7 +309,7 @@ render_breadcrumb([
                                                 // pintamos como chips "Talla (piezas)"
                                                 $chips = [];
                                                 foreach ($rows as $d) {
-                                                    $chips[] = '<span class="chip">' . htmlspecialchars($d['talla']) . '</span> <span class="text-muted">(' . (int)$d['piezas'] . ')</span>';
+                                                    $chips[] = '<span class="chip">' . htmlspecialchars($d['talla']) . '</span> <span style="color: #266434ff;"><b>(' . (int)$d['piezas'] . ')</b></span>';
                                                 }
                                                 echo implode('  ', $chips);
                                             }

@@ -237,6 +237,23 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
     return 'index.php?' . http_build_query($qs);
 };
 ?>
+<!-- ===== Encabezado SOLO impresión ===== -->
+<div class="print-only print-header report-existencias">
+    <div class="ph-left">
+        <img class="ph-logo" src="<?= htmlspecialchars($BASE . '/assets/img/logo.png') ?>" alt="Logo" onerror="this.style.display='none'">
+    </div>
+    <div class="ph-center">
+        <h1 class="ph-title">Policía Estatal de Seguridad Pública</h1>
+        <div class="ph-sub">Existencias (netas) por talla</div>
+    </div>
+    <div class="ph-right">
+        <div class="ph-meta">
+            <div><strong>Fecha:</strong> <?= htmlspecialchars(date('Y-m-d')) ?></div>
+            <div><strong>Generado por:</strong> <?= htmlspecialchars(auth_current_user()['email'] ?? 'sistema') ?></div>
+        </div>
+    </div>
+</div>
+<!-- /Encabezado SOLO impresión -->
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -259,119 +276,134 @@ $mk = function ($p) use ($q, $categ, $agrupar, $mostrar0) {
             if ($mostrar0)    $qsBase['mostrar0'] = 1;
             $qsCsv  = http_build_query(array_merge($qsBase, ['export' => 'csv']));
             ?>
-            <a class="btn btn-outline-success btn-sm no-print" href="index.php?<?= htmlspecialchars($qsCsv) ?>">Exportar Excel (CSV)</a>
-            <button class="btn btn-outline-primary btn-sm no-print" onclick="window.print()">Imprimir / PDF</button>
-        </div>
-    </div>
-
-    <!-- Filtros -->
-    <form class="row g-2 mb-3 no-print" method="get" action="index.php">
-        <div class="col-md-4">
-            <label class="form-label">Buscar</label>
-            <input type="text" name="q" class="form-control"
-                value="<?= htmlspecialchars($q) ?>"
-                placeholder="Código, descripción, modelo, categoría o talla">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Categoría</label>
-            <select name="categoria" class="form-select">
-                <option value="">— Todas —</option>
-                <?php foreach ($cats as $c): ?>
-                    <option value="<?= htmlspecialchars($c['categoria']) ?>"
-                        <?= ($categ === $c['categoria'] ? 'selected' : '') ?>>
-                        <?= htmlspecialchars($c['categoria']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label">Agrupar</label>
-            <select name="agrupar" class="form-select">
-                <option value="producto" <?= ($agrupar === 'producto' ? 'selected' : '') ?>>Por producto</option>
-                <option value="talla" <?= ($agrupar === 'talla' ? 'selected' : '') ?>>Por talla</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label class="form-label d-block">Opciones</label>
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="mostrar0" name="mostrar0" value="1" <?= ($mostrar0 ? 'checked' : '') ?>>
-                <label class="form-check-label" for="mostrar0">Incluir en cero</label>
+            <!-- Acciones (afuera del form). No las metas en el mismo flex del form -->
+            <div class="d-flex justify-content-end gap-2 no-print mb-2">
+                <a class="btn btn-outline-success btn-sm" href="index.php?<?= htmlspecialchars($qsCsv) ?>">Exportar Excel (CSV)</a>
+                <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Imprimir / PDF</button>
             </div>
         </div>
-        <div class="col-md-1 d-grid">
-            <label class="form-label">&nbsp;</label>
-            <button class="btn btn-outline-secondary">Aplicar</button>
-        </div>
-    </form>
-
-    <!-- Tabla -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <?php if (!$rows): ?>
-                <div class="text-muted">Sin resultados con el filtro actual.</div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-sm table-striped table-report">
-                        <colgroup>
-                            <col style="width:16%"> <!-- Código -->
-                            <col style="width:12%"> <!-- Modelo -->
-                            <col> <!-- Descripción (rellena el resto) -->
-                            <col style="width:10%"> <!-- Talla -->
-                            <col style="width:14%"> <!-- Existencias -->
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Modelo</th>
-                                <th>Descripción</th>
-                                <th class="text-center">Talla</th>
-                                <th class="text-end">Existencias</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($rows as $r): ?>
-                                <tr>
-                                    <td class="text-monospace"><?= htmlspecialchars($r['codigo']) ?></td>
-                                    <td class="text-monospace"><?= htmlspecialchars($r['modelo']) ?></td>
-                                    <td><?= htmlspecialchars($r['descripcion']) ?></td>
-                                    <?php if ($agrupar === 'talla'): ?>
-                                        <td><?= htmlspecialchars($r['talla']) ?></td>
-                                    <?php else: ?>
-                                        <td>
-                                            <?php if ((int)$r['maneja_talla'] === 1): ?>
-                                                Sí
-                                            <?php else: ?>
-                                                No
-                                            <?php endif; ?>
-                                        </td>
-                                    <?php endif; ?>
-                                    <td class="text-end"><?= number_format((int)$r['existencias']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-
-                <?php if ($totalPages > 1): ?>
-                    <nav class="mt-3" aria-label="Paginación">
-                        <ul class="pagination pagination-sm">
-                            <li class="page-item <?= ($pagina <= 1 ? 'disabled' : '') ?>">
-                                <a class="page-link" href="<?= ($pagina <= 1 ? '#' : htmlspecialchars($mk($pagina - 1))) ?>">« Anterior</a>
-                            </li>
-                            <?php for ($p = 1; $p <= $totalPages; $p++): ?>
-                                <li class="page-item <?= ($p === $pagina ? 'active' : '') ?>">
-                                    <a class="page-link" href="<?= htmlspecialchars($mk($p)) ?>"><?= $p ?></a>
-                                </li>
-                            <?php endfor; ?>
-                            <li class="page-item <?= ($pagina >= $totalPages ? 'disabled' : '') ?>">
-                                <a class="page-link" href="<?= ($pagina >= $totalPages ? '#' : htmlspecialchars($mk($pagina + 1))) ?>">Siguiente »</a>
-                            </li>
-                        </ul>
-                    </nav>
-                    <p class="text-muted small">Mostrando <?= count($rows) ?> de <?= $totalRows ?> registros.</p>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
     </div>
+
+    <!-- Filtros / acciones: que NO se imprimen -->
+    <section class="exist-filters no-print">
+        <form class="row g-2 align-items-end" method="get" action="index.php">
+            <div class="col-md-4">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="q" class="form-control"
+                    value="<?= htmlspecialchars($q) ?>"
+                    placeholder="Código, descripción, modelo, categoría o talla">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Categoría</label>
+                <select name="categoria" class="form-select">
+                    <option value="">— Todas —</option>
+                    <?php foreach ($cats as $c): ?>
+                        <option value="<?= htmlspecialchars($c['categoria']) ?>"
+                            <?= ($categ === $c['categoria'] ? 'selected' : '') ?>>
+                            <?= htmlspecialchars($c['categoria']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Agrupar</label>
+                <select name="agrupar" class="form-select">
+                    <option value="producto" <?= ($agrupar === 'producto' ? 'selected' : '') ?>>Por producto</option>
+                    <option value="talla" <?= ($agrupar === 'talla' ? 'selected' : '') ?>>Por talla</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label d-block">Opciones</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="mostrar0" name="mostrar0" value="1" <?= ($mostrar0 ? 'checked' : '') ?>>
+                    <label class="form-check-label" for="mostrar0">Incluir en cero</label>
+                </div>
+            </div>
+
+            <!-- Botón con ancho auto -->
+            <div class="col-12 col-md-auto">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button class="btn btn-outline-secondary w-100 w-md-auto">Aplicar</button>
+            </div>
+        </form>
+    </section>
+    <!-- Área imprimible -->
+    <section class="exist-print"><!-- <- NUEVO -->
+        <!-- AQUÍ deja el listado/tabla de existencias (lo que sí quieres en PDF) -->
+        <div>
+            <div class="card-body">
+                <?php if (!$rows): ?>
+                    <div class="text-muted">Sin resultados con el filtro actual.</div>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped table-report">
+                            <colgroup>
+                                <col style="width:16%"> <!-- Código -->
+                                <col style="width:12%"> <!-- Modelo -->
+                                <col> <!-- Descripción (rellena el resto) -->
+                                <col style="width:10%"> <!-- Talla -->
+                                <col style="width:14%"> <!-- Existencias -->
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Modelo</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Talla</th>
+                                    <th class="text-end">Existencias</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($rows as $r): ?>
+                                    <tr>
+                                        <td class="text-monospace"><?= htmlspecialchars($r['codigo']) ?></td>
+                                        <td class="text-monospace"><?= htmlspecialchars($r['modelo']) ?></td>
+                                        <td><?= htmlspecialchars($r['descripcion']) ?></td>
+                                        <?php if ($agrupar === 'talla'): ?>
+                                            <td><?= htmlspecialchars($r['talla']) ?></td>
+                                        <?php else: ?>
+                                            <td>
+                                                <?php if ((int)$r['maneja_talla'] === 1): ?>
+                                                    Sí
+                                                <?php else: ?>
+                                                    No
+                                                <?php endif; ?>
+                                            </td>
+                                        <?php endif; ?>
+                                        <td class="text-end"><?= number_format((int)$r['existencias']) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <?php if ($totalPages > 1): ?>
+                        <nav class="mt-3" aria-label="Paginación">
+                            <ul class="pagination pagination-sm">
+                                <li class="page-item <?= ($pagina <= 1 ? 'disabled' : '') ?>">
+                                    <a class="page-link" href="<?= ($pagina <= 1 ? '#' : htmlspecialchars($mk($pagina - 1))) ?>">« Anterior</a>
+                                </li>
+                                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+                                    <li class="page-item <?= ($p === $pagina ? 'active' : '') ?>">
+                                        <a class="page-link" href="<?= htmlspecialchars($mk($p)) ?>"><?= $p ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                                <li class="page-item <?= ($pagina >= $totalPages ? 'disabled' : '') ?>">
+                                    <a class="page-link" href="<?= ($pagina >= $totalPages ? '#' : htmlspecialchars($mk($pagina + 1))) ?>">Siguiente »</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <p class="text-muted small">Mostrando <?= count($rows) ?> de <?= $totalRows ?> registros.</p>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </div>
 </div>
+</section>
+<?php require_once __DIR__ . '/../../../includes/pie_institucional.php'; ?>
+
+
 <?php require_once __DIR__ . '/../../../includes/footer.php'; ?>

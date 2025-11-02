@@ -104,6 +104,26 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/reporte_categoria.php') ?>">Reporte por categoría</a></li>
                         </ul>
                     </li>
+
+
+                    <li class="nav-item dropdown">
+                        <?php
+                        // Activo si cae en cualquiera de las rutas de inventario
+                        $isInvActive = nav_active('/inventario/entradas/')
+                            || nav_active('/inventario/existencias/');
+                        ?>
+                        <a class="nav-link dropdown-toggle <?= $isInvActive ? 'active' : '' ?>" href="#" data-bs-toggle="dropdown">
+                            Reportes
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Reportes</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/reportes/reportes_uniformes.php') ?>">Reporte Salidas</a></li>                            
+                        </ul>
+                    </li>
+
+
                     <!-- Administración (placeholder futuro) -->
                     <li class="nav-item dropdown">
                         <?php $isAdminActive = nav_active('/users') || nav_active('/roles'); ?>
@@ -111,8 +131,8 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             Administración
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item disabled" href="#">Usuarios (pronto)</a></li>
-                            <li><a class="dropdown-item disabled" href="#">Roles (pronto)</a></li>
+                            <li><a class="dropdown-item disabled" href="#">Usuarios (pendiente)</a></li>
+                            <li><a class="dropdown-item disabled" href="#">Roles (pendiente)</a></li>
                         </ul>
                     </li>
                 <?php endif; ?>

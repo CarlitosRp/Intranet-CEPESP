@@ -180,7 +180,7 @@ render_breadcrumb([
     </div>
 
     <!-- Filtros -->
-    <form method="get" action="por_empleado.php" class="row g-2 mb-3 no-print">
+    <form method="get" action="por_empleado.php" class="row g-2 mb-3 no-print d-flex flex-row align-items-center">
         <div class="col-md-5">
             <label class="form-label">Empleado</label>
             <select name="id_empleado" class="form-select" required>
