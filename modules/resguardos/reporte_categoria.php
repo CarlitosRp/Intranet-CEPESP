@@ -158,10 +158,10 @@ if ($categ !== '' && !empty($_GET['export']) && $_GET['export'] === 'csv') {
 // ====== Render ======
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/breadcrumbs.php';
-render_breadcrumb([
+/*render_breadcrumb([
     ['label' => 'Resguardos', 'href' => $BASE . '/modules/resguardos/index.php'],
     ['label' => 'Reporte por categoría']
-]);
+]);*/
 ?>
 <style>
     @media print {
@@ -210,7 +210,7 @@ render_breadcrumb([
     </div>
 
     <!-- Filtros -->
-    <form method="get" action="reporte_categoria.php" class="row g-2 mb-3 no-print">
+    <form method="get" action="reporte_categoria.php" class="row g-2 mb-3 no-print d-flex flex-row align-items-center">
         <div class="col-md-3">
             <label class="form-label">Desde</label>
             <input type="date" name="desde" value="<?= htmlspecialchars($desde) ?>" class="form-control">
@@ -232,7 +232,7 @@ render_breadcrumb([
         </div>
         <div class="col-md-2 d-grid">
             <label class="form-label">&nbsp;</label>
-            <button class="btn btn-outline-secondary">Aplicar</button>
+            <button class="btn btn-outline-secondary">Filtrar</button>
         </div>
     </form>
 
@@ -309,7 +309,7 @@ render_breadcrumb([
                                                 // pintamos como chips "Talla (piezas)"
                                                 $chips = [];
                                                 foreach ($rows as $d) {
-                                                    $chips[] = '<span class="chip">' . htmlspecialchars($d['talla']) . '</span> <span class="text-muted">(' . (int)$d['piezas'] . ')</span>';
+                                                    $chips[] = '<span class="chip">' . htmlspecialchars($d['talla']) . '</span> <span style="color: #266434ff;"><b>(' . (int)$d['piezas'] . ')</b></span>';
                                                 }
                                                 echo implode('  ', $chips);
                                             }

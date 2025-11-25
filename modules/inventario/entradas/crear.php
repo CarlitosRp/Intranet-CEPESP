@@ -93,11 +93,11 @@ $hoy   = date('Y-m-d');
 $page_title = 'Inventario · Nueva entrada';
 require_once __DIR__ . '/../../../includes/header.php';
 require_once __DIR__ . '/../../../includes/breadcrumbs.php';
-render_breadcrumb([
+/*render_breadcrumb([
     ['label' => 'Inventario'],
     ['label' => 'Entradas', 'href' => $BASE . '/modules/inventario/entradas/index.php'],
     ['label' => 'Nueva entrada']
-]);
+]);*/
 ?>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">

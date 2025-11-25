@@ -28,7 +28,7 @@ $URL_ENTRADAS_INDEX = $BASE . '/modules/inventario/entradas/index.php';
 $URL_ENTRADAS_NUEVA = $BASE . '/modules/inventario/entradas/crear.php';
 $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
 ?>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-dark navbar-expand-lg" style="background-color: #0b2965;">
     <div class="container">
         <a class="navbar-brand" href="<?= htmlspecialchars($URL_CATALOGO) ?>">Intranet CEPESP</a>
 
@@ -104,6 +104,26 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/resguardos/reporte_categoria.php') ?>">Reporte por categoría</a></li>
                         </ul>
                     </li>
+
+
+                    <li class="nav-item dropdown">
+                        <?php
+                        // Activo si cae en cualquiera de las rutas de inventario
+                        $isInvActive = nav_active('/inventario/entradas/')
+                            || nav_active('/inventario/existencias/');
+                        ?>
+                        <a class="nav-link dropdown-toggle <?= $isInvActive ? 'active' : '' ?>" href="#" data-bs-toggle="dropdown">
+                            Reportes
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <h6 class="dropdown-header">Reportes</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="<?= htmlspecialchars($BASE . '/modules/reportes/reportes_uniformes.php') ?>">Reporte Salidas</a></li>                            
+                        </ul>
+                    </li>
+
+
                     <!-- Administración (placeholder futuro) -->
                     <li class="nav-item dropdown">
                         <?php $isAdminActive = nav_active('/users') || nav_active('/roles'); ?>
@@ -111,8 +131,8 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
                             Administración
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item disabled" href="#">Usuarios (pronto)</a></li>
-                            <li><a class="dropdown-item disabled" href="#">Roles (pronto)</a></li>
+                            <li><a class="dropdown-item disabled" href="#">Usuarios (pendiente)</a></li>
+                            <li><a class="dropdown-item disabled" href="#">Roles (pendiente)</a></li>
                         </ul>
                     </li>
                 <?php endif; ?>
@@ -123,9 +143,9 @@ $URL_EXISTENCIAS    = $BASE . '/modules/inventario/existencias/index.php';
             <ul class="navbar-nav ms-auto">
                 <?php if ($isLogged): ?>
                     <li class="nav-item">
-                        <span class="navbar-text me-2">
+                        <span class="navbar-text me-2" style="color: #ffffff;">
                             👋 <?= htmlspecialchars($u['name'] ?? $u['email'] ?? 'Usuario') ?>
-                            <small class="text-muted">
+                            <small class="">
                                 (<?= htmlspecialchars($u['role'] ?? '') ?>)
                             </small>
                         </span>

@@ -22,7 +22,7 @@ if ($id <= 0) {
 // ================== Cargar cabecera de la salida ==================
 $Srow = db_select_all("
   SELECT
-    s.id_salida, s.fecha, s.observaciones, s.creado_por,
+    s.id_salida, s.fecha, s.tipo_resguardo, s.observaciones, s.creado_por,
     e.id_empleado, e.no_empleado, e.nombre_completo AS empleado_nombre
   FROM salidas s
   JOIN empleados e ON e.id_empleado = s.id_empleado
@@ -34,6 +34,28 @@ if (!$Srow || isset($Srow['_error'])) {
     exit('Salida no encontrada.');
 }
 $S = $Srow[0];
+
+$tipo_resguardo = $S['tipo_resguardo'] ?? null;
+
+// Por seguridad, si alguna salida vieja no tiene tipo, asumimos UNIFORMES.
+/*if (!$tipo_resguardo) {
+    $tipo_resguardo = 'UNIFORMES';
+}*/
+
+// Mapeo entre tipo de resguardo y equipo.categoria
+switch ($tipo_resguardo) {
+    case 'UNIFORME':
+        $categoriaFiltro = 'Uniforme';        // 👈 AJUSTA al valor EXACTO en equipo.categoria
+        break;
+
+    case 'EQUIPO TACTICO':
+        $categoriaFiltro = 'Equipo Táctico';   // 👈 AJUSTA al valor EXACTO en equipo.categoria
+        break;
+
+    default:
+        $categoriaFiltro = null;
+        break;
+}
 
 // ================== Helpers de stock ==================
 function get_disponible_variante(mysqli $cn, int $id_var): int
@@ -55,6 +77,8 @@ unset($_SESSION['flash_ok'], $_SESSION['flash_err']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
 
+
+
     // ---- Agregar partida ----
     if ($accion === 'add') {
         $id_var   = (int)($_POST['id_variante'] ?? 0);
@@ -72,6 +96,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash_err'] = "No puedes exceder la existencia disponible ({$disp}).";
             header('Location: editar.php?id=' . urlencode((string)$id));
             exit;
+        }
+
+        // ✅ Validar que la variante corresponde a la categoría del tipo de resguardo
+        if (!empty($categoriaFiltro) && $id_var > 0) {
+            $rowCat = db_select_all("
+          SELECT e.categoria
+          FROM item_variantes v
+          JOIN equipo e ON e.id_equipo = v.id_equipo
+          WHERE v.id_variante = $id_var
+          LIMIT 1
+        ");
+            if (!$rowCat || isset($rowCat['_error'])) {
+                $_SESSION['flash_err'] = 'El artículo seleccionado no existe.';
+                header('Location: editar.php?id=' . urlencode((string)$id));
+                exit;
+            }
+            if ($rowCat[0]['categoria'] !== $categoriaFiltro) {
+                $_SESSION['flash_err'] = 'El artículo no corresponde al tipo de resguardo (' . htmlspecialchars($tipo_resguardo) . ').';
+                header('Location: editar.php?id=' . urlencode((string)$id));
+                exit;
+            }
         }
 
         // Insertar partida
@@ -208,8 +253,10 @@ $equipos = db_select_all("
   SELECT e.id_equipo, e.codigo, e.descripcion, e.modelo
   FROM equipo e
   WHERE e.activo = 1
+    AND e.categoria = '" . $categoriaFiltro . "'
   ORDER BY e.descripcion ASC
 ");
+
 if (isset($equipos['_error'])) $equipos = [];
 
 // ================== Variantes para ALTA: solo con existencia > 0 ==================
@@ -220,6 +267,7 @@ $vars_add = db_select_all("
     v.talla,
     (COALESCE(ent.cant,0) - COALESCE(sal.cant,0)) AS disp
   FROM item_variantes v
+  JOIN equipo e ON e.id_equipo = v.id_equipo                 -- 👈 NUEVO JOIN
   LEFT JOIN (
     SELECT id_variante, SUM(cantidad) AS cant
     FROM entradas_detalle
@@ -231,8 +279,10 @@ $vars_add = db_select_all("
     GROUP BY id_variante
   ) sal ON sal.id_variante = v.id_variante
   WHERE (COALESCE(ent.cant,0) - COALESCE(sal.cant,0)) > 0
+    AND e.categoria = '" . $categoriaFiltro . "'             -- 👈 FILTRO POR CATEGORÍA
   ORDER BY v.id_equipo ASC, v.talla ASC
 ");
+
 if (isset($vars_add['_error'])) $vars_add = [];
 
 // ================== Variantes para EDICIÓN: TODAS (aunque disp sea 0) ==================
@@ -243,6 +293,7 @@ $vars_all = db_select_all("
     v.talla,
     (COALESCE(ent.cant,0) - COALESCE(sal.cant,0)) AS disp
   FROM item_variantes v
+  JOIN equipo e ON e.id_equipo = v.id_equipo                 -- 👈 NUEVO JOIN
   LEFT JOIN (
     SELECT id_variante, SUM(cantidad) AS cant
     FROM entradas_detalle
@@ -253,8 +304,10 @@ $vars_all = db_select_all("
     FROM salidas_detalle
     GROUP BY id_variante
   ) sal ON sal.id_variante = v.id_variante
+  WHERE e.categoria = '" . $categoriaFiltro . "'             -- 👈 SOLO ESA CATEGORÍA
   ORDER BY v.id_equipo ASC, v.talla ASC
 ");
+
 if (isset($vars_all['_error'])) $vars_all = [];
 
 // ====== Preparar estructuras livianas para JS ======
@@ -347,6 +400,7 @@ if ($has_resguardo) {
     $href_imprimir = BASE_URL . '/modules/resguardos/imprimir.php?id_resguardo=' . $res_id;
 }
 ?>
+
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h5 mb-0">Salida No. <?= htmlspecialchars(str_pad((string)$S['id_salida'], 5, '0', STR_PAD_LEFT)) ?></h1>
@@ -354,7 +408,7 @@ if ($has_resguardo) {
             <div class="alert alert-success alert-dismissible fade show auto-hide mt-2" role="alert">
                 <span class="me-2">
                     Ya existe resguardo <strong>No. <?= htmlspecialchars($folio_str) ?></strong> para esta salida.
-                </span>                
+                </span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
         <?php endif; ?>
@@ -375,7 +429,7 @@ if ($has_resguardo) {
                     </button>
                 <?php else: ?>
                     <form method="post"
-                        action="<?= htmlspecialchars(BASE_URL . 'modules/resguardos/crear.php') ?>"
+                        action="<?= htmlspecialchars(BASE_URL . '/modules/resguardos/crear.php') ?>"
                         class="d-inline">
                         <input type="hidden" name="csrf_token"
                             value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">

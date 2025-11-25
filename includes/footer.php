@@ -7,7 +7,7 @@
                 alert.classList.remove("show");
                 alert.classList.add("fade");
                 setTimeout(() => alert.remove(), 500);
-            }, 4000);
+            }, 2000);
         });
     });
 </script>

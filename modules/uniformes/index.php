@@ -91,7 +91,7 @@ if (!empty($_GET['deleted'])) {
 $page_title = 'Uniformes · Listado';
 require_once __DIR__ . '/../../includes/header.php';
 require_once __DIR__ . '/../../includes/breadcrumbs.php';
-render_breadcrumb([['label' => 'Listado (no agrupado)']]);
+/*render_breadcrumb([['label' => 'Listado (no agrupado)']]);*/
 ?>
 
 <div class="container py-4">
@@ -128,7 +128,7 @@ render_breadcrumb([['label' => 'Listado (no agrupado)']]);
 
     <!-- Tabla -->
     <div class="table-responsive">
-        <table class="table table-sm align-middle bg-white shadow-sm">
+        <table class="table table-striped table-bordered table-sm table-hover" style="width:100%">
             <thead class="table-light">
                 <tr>
                     <th style="width:80px">ID</th>

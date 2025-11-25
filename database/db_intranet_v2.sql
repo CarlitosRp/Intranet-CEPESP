@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS empleados (
   no_empleado   VARCHAR(20)  NOT NULL UNIQUE,
   curp          VARCHAR(18)  NOT NULL UNIQUE,
   nombre_completo VARCHAR(120) NOT NULL,
-  base          VARCHAR(80)  DEFAULT NULL,   -- antes 'departamento'
+  base          VARCHAR(80)  DEFAULT NULL,
   puesto        VARCHAR(80)  DEFAULT NULL,
   estatus       TINYINT(1)   NOT NULL DEFAULT 1, -- 1=activo,0=baja
   sexo          ENUM('MASCULINO','FEMENINO') DEFAULT NULL,
@@ -129,20 +129,20 @@ CREATE TABLE IF NOT EXISTS salidas_detalle (
 -- Estructura de tabla para la tabla `resguardos`
 -- --------------------------------------------------------
 
-CREATE TABLE `resguardos` (
-  `id_resguardo` INT(11) NOT NULL AUTO_INCREMENT,
-  `id_salida` INT(11) NOT NULL,
-  `anio` INT(11) NOT NULL,
-  `folio` INT(11) NOT NULL,
-  `fecha` DATE NOT NULL,
-  `lugar` VARCHAR(80) DEFAULT NULL,
-  `director` VARCHAR(120) DEFAULT NULL,
-  `creado_por` VARCHAR(60) DEFAULT NULL,
-  PRIMARY KEY (`id_resguardo`),
-  UNIQUE KEY `uq_resguardo_anio_folio` (`anio`, `folio`),
-  UNIQUE KEY `uq_resguardo_salida` (`id_salida`),
-  KEY `idx_resg_id_salida` (`id_salida`),
-  CONSTRAINT `fk_resguardos_salida` FOREIGN KEY (`id_salida`) REFERENCES `salidas` (`id_salida`) ON UPDATE CASCADE
+CREATE TABLE resguardos (
+  id_resguardo INT(11) NOT NULL AUTO_INCREMENT,
+  id_salida INT(11) NOT NULL,
+  año INT(11) NOT NULL,
+  folio INT(11) NOT NULL,
+  fecha DATE NOT NULL,
+  lugar VARCHAR(80) DEFAULT NULL,
+  director VARCHAR(120) DEFAULT NULL,
+  creado_por VARCHAR(60) DEFAULT NULL,
+  PRIMARY KEY (id_resguardo),
+  UNIQUE KEY uq_resguardo_anio_folio (anio, folio),
+  UNIQUE KEY uq_resguardo_salida (id_salida),
+  KEY idx_resg_id_salida (id_salida),
+  CONSTRAINT fk_resguardos_salida FOREIGN KEY (id_salida) REFERENCES salidas (id_salida) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -157,7 +157,7 @@ CREATE TABLE `resguardos` (
 CREATE TABLE IF NOT EXISTS folio_series (
   id_serie            INT AUTO_INCREMENT PRIMARY KEY,
   serie               VARCHAR(20) NOT NULL,     -- ej. 'RES-ET'
-  `año`               INT         NOT NULL,
+  año               INT         NOT NULL,
   ultimo_folio        INT         NOT NULL DEFAULT 0,
   reinicia_anualmente TINYINT(1)  NOT NULL DEFAULT 1,
   prefijo             VARCHAR(20) DEFAULT NULL, -- ej. 'RES-ET'
@@ -176,25 +176,7 @@ CREATE TABLE IF NOT EXISTS print_logs (
   INDEX idx_pl_res (id_resguardo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- === VISTA: existencias por variante (solo con ENTRADAS) =====================
-DROP VIEW IF EXISTS v_existencias;
-CREATE VIEW v_existencias AS
-SELECT
-  v.id_variante,
-  e.id_equipo,
-  e.codigo,
-  e.descripcion,
-  e.modelo,
-  e.categoria,
-  e.maneja_talla,
-  v.talla,
-  SUM(d.cantidad) AS existencias
-FROM entradas_detalle d
-JOIN item_variantes v ON v.id_variante = d.id_variante
-JOIN equipo e         ON e.id_equipo   = v.id_equipo
-GROUP BY
-  v.id_variante, e.id_equipo, e.codigo, e.descripcion, e.modelo,
-  e.categoria, e.maneja_talla, v.talla;
+-- ================= VISTAS =====================
 
   -- =============== VISTA: existencias netas (entradas - salidas) ==
 DROP VIEW IF EXISTS v_existencias_netas;
@@ -222,9 +204,56 @@ LEFT JOIN (
   GROUP BY d.id_variante
 ) sal ON sal.id_variante = v.id_variante;
 
+-- =======================================================
+-- VISTA: v_uniformes_empleados
+-- Descripción:
+--   Muestra solo a los empleados que han recibido artículos
+--   de uniformes (pantalón, camisa, botas), junto con su talla
+--   y la cantidad recibida.
+-- =======================================================
+
+DROP VIEW IF EXISTS v_uniformes_empleados;
+CREATE VIEW v_uniformes_empleados AS
+SELECT 
+  e.no_empleado AS `No. Empleado`,
+  e.nombre_completo AS `Nombre Empleado`,
+  s.fecha AS `Fecha`,
+
+  -- 🔹 Pantalón
+  MAX(CASE WHEN eq.categoria = 'Uniforme' 
+           AND eq.descripcion LIKE '%Pantalón%' 
+      THEN v.talla END) AS `Talla Pantalón`,
+  SUM(CASE WHEN eq.categoria = 'Uniforme' 
+           AND eq.descripcion LIKE '%Pantalón%' 
+      THEN sd.cantidad ELSE 0 END) AS `Cantidad Pantalón`,
+
+  -- 🔹 Camisa
+  MAX(CASE WHEN eq.categoria = 'Uniforme' 
+           AND eq.descripcion LIKE '%Camisa%' 
+      THEN v.talla END) AS `Talla Camisa`,
+  SUM(CASE WHEN eq.categoria = 'Uniforme' 
+           AND eq.descripcion LIKE '%Camisa%' 
+      THEN sd.cantidad ELSE 0 END) AS `Cantidad Camisa`,
+
+  -- 🔹 Botas
+  MAX(CASE WHEN eq.categoria = 'Uniforme' 
+      THEN v.talla END) AS `Talla Botas`,
+  SUM(CASE WHEN eq.categoria = 'Calzado' 
+      THEN sd.cantidad ELSE 0 END) AS `Cantidad Botas`
+
+FROM empleados e
+LEFT JOIN salidas s          ON s.id_empleado = e.id_empleado
+LEFT JOIN salidas_detalle sd ON sd.id_salida = s.id_salida
+LEFT JOIN item_variantes v   ON v.id_variante = sd.id_variante
+LEFT JOIN equipo eq          ON eq.id_equipo = v.id_equipo
+
+GROUP BY e.id_empleado, e.no_empleado, e.nombre_completo
+HAVING SUM(sd.cantidad) > 0     -- 🔸 Solo empleados con entregas
+ORDER BY e.no_empleado;
+
 INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 -- Botas
-('BOTA-12401', 'Bota táctica color negro marca 5.11', '12401', 'Calzado', 1),
+('BOTA-12401', 'Bota táctica color negro marca 5.11', '12401', 'Uniforme', 1),
 
 -- Pantalones (caballero)
 ('PANT-74369', 'Pantalón táctico caballero azul marino', '74369', 'Uniforme', 1),
@@ -243,20 +272,20 @@ INSERT INTO equipo (codigo, descripcion, modelo, categoria, maneja_talla) VALUES
 
 -- Otros del listado de resguardo
 ('GORRA-001', 'Gorra (OCAPC)', NULL, 'Uniforme', 1),
-('CASCO-001', 'Casco balístico', NULL, 'Protección', 1),
-('LAMP-001', 'Lámpara táctica', NULL, 'Accesorio', 0),
-('FORN-001', 'Fornitura (5 accesorios)', NULL, 'Accesorio', 0),
-('ESP-001', 'Esposas (Smith & Wesson)', NULL, 'Accesorio', 0),
-('PORTA-ARMA-L', 'Porta cargador arma larga (pouch)', NULL, 'Accesorio', 0),
-('PORTA-ARMA-C', 'Porta cargador arma corta (Milfort)', NULL, 'Accesorio', 0),
-('CINT-001', 'Cinturón militar (G&P Outdoor Belt)', NULL, 'Accesorio', 1),
-('PASA-001', 'Paga montaña táctico', NULL, 'Accesorio', 0),
-('PORTA-ESP-001', 'Porta esposa plástico (Milfort)', NULL, 'Accesorio', 0),
-('PORTA-FUS-001', 'Porta fusil táctico 3 puntos', NULL, 'Accesorio', 0),
-('CODERA-001', 'Par de coderas tácticas (FX Tactical)', NULL, 'Protección', 1),
-('RODILLERA-001', 'Par de rodilleras tácticas (FX Tactical)', NULL, 'Protección', 1),
-('GOOGLE-001', 'Google táctico (FX Tactical)', NULL, 'Protección', 1),
-('GUANTE-001', 'Guantes tácticos (PMT)', NULL, 'Protección', 1);
+('CASCO-001', 'Casco balístico', NULL, 'Equipo Táctico', 1),
+('LAMP-001', 'Lámpara táctica', NULL, 'Equipo Táctico', 0),
+('FORN-001', 'Fornitura (5 accesorios)', NULL, 'Equipo Táctico', 0),
+('ESP-001', 'Esposas (Smith & Wesson)', NULL, 'Equipo Táctico', 0),
+('PORTA-ARMA-L', 'Porta cargador arma larga (pouch)', NULL, 'Equipo Táctico', 0),
+('PORTA-ARMA-C', 'Porta cargador arma corta (Milfort)', NULL, 'Equipo Táctico', 0),
+('CINT-001', 'Cinturón militar (G&P Outdoor Belt)', NULL, 'Equipo Táctico', 1),
+('PASA-001', 'Paga montaña táctico', NULL, 'Equipo Táctico', 0),
+('PORTA-ESP-001', 'Porta esposa plástico (Milfort)', NULL, 'Equipo Táctico', 0),
+('PORTA-FUS-001', 'Porta fusil táctico 3 puntos', NULL, 'Equipo Táctico', 0),
+('CODERA-001', 'Par de coderas tácticas (FX Tactical)', NULL, 'Equipo Táctico', 1),
+('RODILLERA-001', 'Par de rodilleras tácticas (FX Tactical)', NULL, 'Equipo Táctico', 1),
+('GOOGLE-001', 'Google táctico (FX Tactical)', NULL, 'Equipo Táctico', 1),
+('GUANTE-001', 'Guantes tácticos (PMT)', NULL, 'Equipo Táctico', 1);
 
 /* =========================================
    VARIANTES (tallas) por artículo (item_variantes)
@@ -362,7 +391,7 @@ INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM 
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo='CINT-001';
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo='CINT-001';
 
-/* --- CODERAS / RODILLERAS / GOGGLE / GUANTES (ajustables; dejo S–L, cambia si son únicas) --- */
+/* --- CODERAS / RODILLERAS / GOOGLE / GUANTES (ajustables; dejo S–L, cambia si son únicas) --- */
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'S' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'M' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');
 INSERT IGNORE INTO item_variantes (id_equipo, talla) SELECT id_equipo, 'L' FROM equipo WHERE codigo IN ('CODERA-001','RODILLERA-001','GOOGLE-001','GUANTE-001');

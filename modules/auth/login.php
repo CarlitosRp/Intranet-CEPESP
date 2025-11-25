@@ -60,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="card shadow-sm">
         <div class="card-body">
-            <h1 class="h5 mb-3 text-center">Intranet · Acceso</h1>
+            <img src="<?= htmlspecialchars($BASE . '/assets/img/logo.png') ?>" alt="CEPESP Logo" class="d-block mx-auto mb-3" style="height: 100px;">
+            <h1 class="h5 mb-3 text-center">Intranet CEPESP</h1>
 
             <?php if (!empty($flash_ok)): ?>
                 <div class="alert alert-success alert-dismissible fade show auto-hide">
@@ -78,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="post" action="login.php?next=<?= urlencode($next) ?>">
                 <div class="mb-3">
-                    <label class="form-label">Email</label>
+                    <label class="form-label">Correo Electrónico</label>
                     <input type="email" name="email" class="form-control" placeholder="admin@local" required autofocus>
                 </div>
                 <div class="mb-3">
@@ -101,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     alert.classList.remove("show");
                     alert.classList.add("fade");
                     setTimeout(() => alert.remove(), 500);
-                }, 4000);
+                }, 2000);
             });
         });
     </script>

@@ -88,7 +88,7 @@ $page_title = 'Uniformes · Catálogo';
 require_once __DIR__ . '/../../includes/header.php';
 
 require_once __DIR__ . '/../../includes/breadcrumbs.php';
-render_breadcrumb([['label' => 'Catálogo']]);
+/*render_breadcrumb([['label' => 'Catálogo']]);*/
 ?>
 
 <div class="container py-4">

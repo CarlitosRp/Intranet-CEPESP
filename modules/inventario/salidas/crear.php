@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $fecha = trim($_POST['fecha'] ?? date('Y-m-d'));
         $id_empleado = (int)($_POST['id_empleado'] ?? 0);
+        $tipo_resguardo = trim($_POST['tipo_resguardo'] ?? '');
         $obs   = trim($_POST['observaciones'] ?? '');
         $creado_por = $_SESSION['user']['username'] ?? ($_SESSION['user']['email'] ?? 'sistema');
 
@@ -58,12 +59,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        $tipos_validos = ['UNIFORME', 'EQUIPO TACTICO'];
+        if (!in_array($tipo_resguardo, $tipos_validos, true)) {
+            $err['tipo_resguardo'] = 'Debe seleccionar un tipo de resguardo válido.';
+        }
+
         if (!$err) {
             $stmt = mysqli_prepare($cn, "
-        INSERT INTO salidas (fecha, id_empleado, observaciones, creado_por)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO salidas (fecha, id_empleado, tipo_resguardo, observaciones, creado_por)
+        VALUES (?, ?, ?, ?, ?)
       ");
-            mysqli_stmt_bind_param($stmt, 'siss', $fecha, $id_empleado, $obs, $creado_por);
+            mysqli_stmt_bind_param($stmt, 'sisss', $fecha, $id_empleado, $tipo_resguardo, $obs, $creado_por);
 
             try {
                 $ok = mysqli_stmt_execute($stmt);
@@ -91,11 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require_once __DIR__ . '/../../../includes/header.php';
 require_once __DIR__ . '/../../../includes/breadcrumbs.php';
-render_breadcrumb([
+/*render_breadcrumb([
     ['label' => 'Inventario'],
     ['label' => 'Salidas', 'href' => $BASE . '/modules/inventario/salidas/index.php'],
     ['label' => 'Nueva salida']
-]);
+]);*/
 ?>
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -140,6 +146,20 @@ render_breadcrumb([
                     <?php if (!empty($err['empleado'])): ?>
                         <div class="text-danger small"><?= htmlspecialchars($err['empleado']) ?></div>
                     <?php endif; ?>
+                </div>
+                <div class="col-md-3">
+                    <label for="tipo_resguardo" class="form-label">Tipo de resguardo</label>
+                    <select name="tipo_resguardo" id="tipo_resguardo" class="form-select" required>
+                        <option value="">— Selecciona —</option>
+                        <option value="UNIFORME"
+                            <?= (isset($tipo_resguardo) && $tipo_resguardo === 'UNIFORME') ? 'selected' : '' ?>>
+                            Uniforme
+                        </option>
+                        <option value="EQUIPO TACTICO"
+                            <?= (isset($tipo_resguardo) && $tipo_resguardo === 'EQUIPO TACTICO') ? 'selected' : '' ?>>
+                            Equipo Táctico
+                        </option>
+                    </select>
                 </div>
 
                 <div class="col-md-12">

@@ -34,7 +34,7 @@ $RMAX = db_select_all("SELECT MAX(folio) AS maxfolio FROM resguardos");
 $nextFolio = (int)($RMAX[0]['maxfolio'] ?? 0) + 1;
 
 // Datos por default (ajústalos si guardas director/lugar en configuración)
-$director = 'ING. MARIA DEL CELIA CARMEN PEÑA TORRES';
+$director = 'ING. MARIA CELIA DEL CARMEN PEÑA TORRES';
 $lugar    = 'Hermosillo, Sonora.';
 $hoy      = date('Y-m-d');
 $user     = $_SESSION['auth_user_email'] ?? 'sistema';

@@ -86,7 +86,7 @@ body {
   margin-top: 6px;
   font-weight: 600;
   font-size: 20px;
-  padding-left: 135px ;
+  padding-left: 135px;
 }
 
 /* Folio anclado arriba-derecha del bloque de textos */
@@ -94,11 +94,11 @@ body {
   position: absolute;
   top: 0;
   right: 0;
-  text-align: center;  
+  text-align: center;
 }
 .hdr-resguardo .hgroup .folio .lbl {
   font-size: 14px;
-  font-weight: 600;    
+  font-weight: 600;
 }
 .hdr-resguardo .hgroup .folio .val {
   display: inline-block;
@@ -136,7 +136,7 @@ body {
 }
 
 .meta .k {
-  width: 140px;  
+  width: 140px;
 }
 
 .meta .v {
@@ -197,7 +197,8 @@ tfoot td {
   border: 1px solid var(--line);
   padding: 2px 6px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .signs {
@@ -380,7 +381,9 @@ footer.pie-institucional a:hover {
    ===================================================================== */
 
 /* Para uso en pantalla también */
-.d-none { display: none !important; }
+.d-none {
+  display: none !important;
+}
 
 /* Encabezado exclusivo de impresión (lo activamos en @media print) */
 .print-header {
@@ -391,7 +394,7 @@ footer.pie-institucional a:hover {
   font-size: 18px;
   margin: 0 0 2px;
 }
-.print-header .ph-meta {  
+.print-header .ph-meta {
   font-size: 16px;
 }
 
@@ -414,11 +417,15 @@ footer.pie-institucional a:hover {
   padding: 6px 8px;
   vertical-align: top;
 }
-.table-report tbody tr:nth-child(even){
+.table-report tbody tr:nth-child(even) {
   background: #fafbfc;
 }
-.table-report .text-end    { text-align: right !important; }
-.table-report .text-center { text-align: center !important; }
+.table-report .text-end {
+  text-align: right !important;
+}
+.table-report .text-center {
+  text-align: center !important;
+}
 
 /* ===================== MODO IMPRESIÓN (EXISTENCIAS) ===================== */
 @media print {
@@ -432,22 +439,256 @@ footer.pie-institucional a:hover {
   }
 
   /* Usa todo el ancho; quita paddings y max-widths del layout */
-  .container, .container-fluid {
+  .container,
+  .container-fluid {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
   /* Muestra encabezado de impresión */
-  .print-header { display: block !important; margin-bottom: 8px; }
+  .print-header {
+    display: block !important;
+    margin-bottom: 8px;
+  }
 
   /* Repite el thead y evita cortes feos */
-  .table-report thead { display: table-header-group; }
-  .table-report tr { page-break-inside: avoid; }
+  .table-report thead {
+    display: table-header-group;
+  }
+  .table-report tr {
+    page-break-inside: avoid;
+  }
 
   /* Si tu tabla no usa .table-report, fuerza bordes básicos como fallback */
-  table.table-report th, table.table-report td {
+  table.table-report th,
+  table.table-report td {
     border: 1px solid var(--line);
   }
 }
 
+/* =============================================
+   VARIABLES (para bordes suaves en tablas)
+   ============================================= */
+:root {
+  --line: #cfd8dc; /* gris claro para líneas */
+}
+
+/* =============================================
+   HELPERS DE VISIBILIDAD (pantalla)
+   No toques .d-none de Bootstrap
+   ============================================= */
+.print-only {
+  display: none;
+} /* solo aparece en impresión */
+.no-print {
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* =============================================
+   ESTILOS BASE DE TABLAS DE REPORTE (pantalla)
+   (No fuerzan nada en Bootstrap; son clases propias)
+   ============================================= */
+.table-report {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1px solid var(--line);
+}
+.table-report thead th {
+  background: #f4f6f8;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 8px;
+}
+.table-report tbody td {
+  border-top: 1px solid var(--line);
+  padding: 6px 8px;
+  vertical-align: top;
+}
+.table-report tbody tr:nth-child(even) {
+  background: #fafbfc;
+}
+.table-report .text-end {
+  text-align: right !important;
+}
+.table-report .text-center {
+  text-align: center !important;
+}
+
+/* =============================================
+   IMPRESIÓN (EXISTENCIAS y genéricos)
+   Todo lo de impresión va en UN solo @media print
+   ============================================= */
+@media print {
+  /* Helpers */
+  .print-only {
+    display: block !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+
+  /* Layout: oculta navegación/alerts/paginación/etc */
+  nav.navbar,
+  header .navbar,
+  .breadcrumb,
+  .btn,
+  .pagination,
+  .alert,
+  .toast-container {
+    display: none !important;
+  }
+
+  /* Página (elige un juego de márgenes) */
+  @page {
+    size: A4;
+    margin: 10mm 10mm 14mm 10mm; /* sup, der, inf, izq */
+  }
+
+  /* Contenedores sin límites en impresión */
+  .exist-page .container,
+  .exist-page .container-fluid {
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 10mm !important; /* margen interno lateral para PDF */
+    margin: 0 !important;
+  }
+
+  /* Área imprimible de existencias */
+  .exist-page .exist-print {
+    margin-top: 0 !important;
+    font-size: 11px;
+    color: #000;
+  }
+  .exist-page .exist-print h1,
+  .exist-page .exist-print h2,
+  .exist-page .exist-print h3 {
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+  }
+
+  /* Tablas compactas y estables */
+  .exist-page .exist-print table,
+  .table-report {
+    width: 100%;
+    border-collapse: collapse !important;
+    table-layout: fixed;
+  }
+  .exist-page .exist-print table th,
+  .exist-page .exist-print table td,
+  .table-report th,
+  .table-report td {
+    border: 1px solid #333 !important;
+    padding: 4px 6px !important;
+    vertical-align: middle;
+    word-wrap: break-word;
+  }
+  .exist-page .exist-print table thead th,
+  .table-report thead th {
+    background: #f0f0f0 !important;
+    font-weight: 600;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .exist-page .exist-print table tbody tr:nth-child(odd) td {
+    background: #fafafa !important;
+  }
+
+  /* Evita cortes feos dentro de filas */
+  table,
+  tr,
+  td,
+  th {
+    page-break-inside: avoid;
+  }
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+
+  /* Cards de Bootstrap sin sombras/bordes en PDF */
+  .exist-page .card,
+  .exist-page .card-header,
+  .exist-page .card-body {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ===== Cabecera de impresión reutilizable ===== */
+  .print-header {
+    display: grid !important;
+    grid-template-columns: 120px 1fr 220px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #777;
+  }
+  .print-header .ph-logo {
+    width: 90px;
+    height: auto;
+  }
+  .print-header .ph-title {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.2;
+    margin: 0;
+    text-align: center;
+  }
+  .print-header .ph-sub {
+    margin-top: 4px;
+    font-size: 12px;
+    text-align: center;
+    color: #444;
+  }
+  .print-header .ph-meta {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .print-header .ph-left {
+    text-align: left;
+  }
+  .print-header .ph-right {
+    text-align: right;
+  }
+
+  /* ===== Pie institucional fijo ===== */
+  .pie-institucional {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 8mm;
+    padding-top: 6px;
+    border-top: 1px solid #777;
+  }
+  .pie-institucional .pi-inner {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 0 6mm;
+  }
+  .pie-institucional .pi-logo2 img{
+    width: 140px;
+    height: auto;
+  }
+  .pie-institucional .pi-text {
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: left;
+  }
+
+  /* Número de página */
+  .page-number {
+    position: fixed;
+    right: 6mm;
+    bottom: 3mm;
+    font-size: 10px;
+    color: #444;
+  }
+}
